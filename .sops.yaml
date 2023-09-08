@@ -1,0 +1,204 @@
+destination_rules:
+# infra
+  - vault_path: "/"
+    vault_kv_mount_name: "secret-v2" # default
+    vault_kv_version: 2 # default
+    path_regex: secrets/sandbox/infra/*
+    omit_extensions: true
+  - vault_path: "/"
+    vault_kv_mount_name: "secret-v2" # default
+    vault_kv_version: 2 # default
+    path_regex: secrets/staging/infra/*
+    omit_extensions: true
+  - vault_path: "/"
+    vault_kv_mount_name: "secret-v2" # default
+    vault_kv_version: 2 # default
+    path_regex: secrets/production/infra/*
+    omit_extensions: true
+# customer-experience
+  - vault_path: "/"
+    vault_kv_mount_name: "secret-v2" # default
+    vault_kv_version: 2 # default
+    path_regex: secrets/sandbox/customer-experience/*
+    omit_extensions: true
+  - vault_path: "/"
+    vault_kv_mount_name: "secret-v2" # default
+    vault_kv_version: 2 # default
+    path_regex: secrets/staging/customer-experience/*
+    omit_extensions: true
+  - vault_path: "/"
+    vault_kv_mount_name: "secret-v2" # default
+    vault_kv_version: 2 # default
+    path_regex: secrets/production/customer-experience/*
+    omit_extensions: true
+# lending
+  - vault_path: "/"
+    vault_kv_mount_name: "secret-v2" # default
+    vault_kv_version: 2 # default
+    path_regex: secrets/sandbox/lending/*
+    omit_extensions: true
+  - vault_path: "/"
+    vault_kv_mount_name: "secret-v2" # default
+    vault_kv_version: 2 # default
+    path_regex: secrets/staging/lending/*
+    omit_extensions: true
+  - vault_path: "/"
+    vault_kv_mount_name: "secret-v2" # default
+    vault_kv_version: 2 # default
+    path_regex: secrets/production/lending/*
+    omit_extensions: true
+# Secret Keys #
+creation_rules:
+  # path: /secrets
+  - path_regex: secrets/sandbox/customer-experience/.*\.yaml$
+    # kms: 'arn:aws:kms:us-east-1:644712362974:key/9d11b3d7-3b7c-4cde-ad6a-75a2721e0e27,arn:aws:kms:us-west-2:644712362974:key/9d994675-3143-4b2a-a920-459c87207998,arn:aws:kms:us-east-1:644712362974:key/978a683a-4864-4537-88fb-2dc8ea4f8080,arn:aws:kms:us-west-2:644712362974:key/5dcee9a6-72f1-4a7f-bdfe-f7be9ad02b72'
+    # age: 'age1dx79fgu9hkts0e686zrqw0yyrpu76vvctgr09w8j058sns7p446qzmffl0,age1dvux7y9uxf362c8j9tw6ug3acmhjdljwzx3h5asrp47sujrdyecq42gqx4'
+    shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
+    key_groups:
+    #default
+    - kms:
+      - arn: 'arn:aws:kms:us-east-1:644712362974:key/9d11b3d7-3b7c-4cde-ad6a-75a2721e0e27'
+        context:
+          account: sops-sa
+          type: age-master-key
+      - arn: 'arn:aws:kms:us-east-1:644712362974:key/978a683a-4864-4537-88fb-2dc8ea4f8080'
+        context:
+          account: default
+          type: age-master-key
+    - kms:
+      - arn: 'arn:aws:kms:us-west-2:644712362974:key/9d994675-3143-4b2a-a920-459c87207998'
+        context:
+          account: sops-sa
+          type: age-master-key
+      - arn: 'arn:aws:kms:us-west-2:644712362974:key/5dcee9a6-72f1-4a7f-bdfe-f7be9ad02b72'
+        context:
+          account: default
+          type: age-master-key
+    #customer-experience
+    - age:
+        - 'age1dvux7y9uxf362c8j9tw6ug3acmhjdljwzx3h5asrp47sujrdyecq42gqx4'
+  - path_regex: secrets/sandbox/infra/.*\.yaml$
+    # kms: 'arn:aws:kms:us-east-1:644712362974:key/9d11b3d7-3b7c-4cde-ad6a-75a2721e0e27,arn:aws:kms:us-west-2:644712362974:key/9d994675-3143-4b2a-a920-459c87207998,arn:aws:kms:us-east-1:644712362974:key/978a683a-4864-4537-88fb-2dc8ea4f8080,arn:aws:kms:us-west-2:644712362974:key/5dcee9a6-72f1-4a7f-bdfe-f7be9ad02b72'
+    # age: 'age1dx79fgu9hkts0e686zrqw0yyrpu76vvctgr09w8j058sns7p446qzmffl0,age1kqcdx46gv7stajxenms5t83af8huc39qe450kzen55sk3kg4fdaqek48m0'
+    shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
+    key_groups:
+    #default
+    - kms:
+      - arn: 'arn:aws:kms:us-east-1:644712362974:key/9d11b3d7-3b7c-4cde-ad6a-75a2721e0e27'
+        context:
+          account: sops-sa
+          type: age-master-key
+      - arn: 'arn:aws:kms:us-east-1:644712362974:key/978a683a-4864-4537-88fb-2dc8ea4f8080'
+        context:
+          account: default
+          type: age-master-key
+    - kms:
+      - arn: 'arn:aws:kms:us-west-2:644712362974:key/9d994675-3143-4b2a-a920-459c87207998'
+        context:
+          account: sops-sa
+          type: age-master-key
+      - arn: 'arn:aws:kms:us-west-2:644712362974:key/5dcee9a6-72f1-4a7f-bdfe-f7be9ad02b72'
+        context:
+          account: default
+          type: age-master-key
+    #infra
+    - age:
+        - 'age1kqcdx46gv7stajxenms5t83af8huc39qe450kzen55sk3kg4fdaqek48m0'
+  - path_regex: secrets/sandbox/lending/.*\.yaml$
+    # kms: 'arn:aws:kms:us-east-1:644712362974:key/9d11b3d7-3b7c-4cde-ad6a-75a2721e0e27,arn:aws:kms:us-west-2:644712362974:key/9d994675-3143-4b2a-a920-459c87207998,arn:aws:kms:us-east-1:644712362974:key/978a683a-4864-4537-88fb-2dc8ea4f8080,arn:aws:kms:us-west-2:644712362974:key/5dcee9a6-72f1-4a7f-bdfe-f7be9ad02b72'
+    # age: 'age1dx79fgu9hkts0e686zrqw0yyrpu76vvctgr09w8j058sns7p446qzmffl0,age1vulxu3tcmzc7uf4nk7m7fsta2mj475q50gwgma2swsrgzds62vcs3zw5l2'
+    shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
+    key_groups:
+    #default
+    - kms:
+      - arn: 'arn:aws:kms:us-east-1:644712362974:key/9d11b3d7-3b7c-4cde-ad6a-75a2721e0e27'
+        context:
+          account: sops-sa
+          type: age-master-key
+      - arn: 'arn:aws:kms:us-east-1:644712362974:key/978a683a-4864-4537-88fb-2dc8ea4f8080'
+        context:
+          account: default
+          type: age-master-key
+    - kms:
+      - arn: 'arn:aws:kms:us-west-2:644712362974:key/9d994675-3143-4b2a-a920-459c87207998'
+        context:
+          account: sops-sa
+          type: age-master-key
+      - arn: 'arn:aws:kms:us-west-2:644712362974:key/5dcee9a6-72f1-4a7f-bdfe-f7be9ad02b72'
+        context:
+          account: default
+          type: age-master-key
+    #lending
+    - age:
+        - 'age1vulxu3tcmzc7uf4nk7m7fsta2mj475q50gwgma2swsrgzds62vcs3zw5l2'
+
+  # path: /age-keys
+  - path_regex: age-keys/infra/.*\.txt$
+    unencrypted-suffix: '^(AGE-SECRET-KEY-*)$'
+    shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
+    key_groups:
+    #default
+    - kms:
+      - arn: 'arn:aws:kms:us-east-1:644712362974:key/9d11b3d7-3b7c-4cde-ad6a-75a2721e0e27'
+        context:
+          account: sops-sa
+          type: age-master-key
+      - arn: 'arn:aws:kms:us-east-1:644712362974:key/978a683a-4864-4537-88fb-2dc8ea4f8080'
+        context:
+          account: default
+          type: age-master-key
+    - kms:
+      - arn: 'arn:aws:kms:us-west-2:644712362974:key/9d994675-3143-4b2a-a920-459c87207998'
+        context:
+          account: sops-sa
+          type: age-master-key
+      - arn: 'arn:aws:kms:us-west-2:644712362974:key/5dcee9a6-72f1-4a7f-bdfe-f7be9ad02b72'
+        context:
+          account: default
+          type: age-master-key
+  - path_regex: age-keys/lending/.*\.txt$
+    unencrypted-suffix: '^(AGE-SECRET-KEY-*)$'
+    shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
+    key_groups:
+    #default
+    - kms:
+      - arn: 'arn:aws:kms:us-east-1:644712362974:key/9d11b3d7-3b7c-4cde-ad6a-75a2721e0e27'
+        context:
+          account: sops-sa
+          type: age-master-key
+      - arn: 'arn:aws:kms:us-east-1:644712362974:key/978a683a-4864-4537-88fb-2dc8ea4f8080'
+        context:
+          account: default
+          type: age-master-key
+    - kms:
+      - arn: 'arn:aws:kms:us-west-2:644712362974:key/9d994675-3143-4b2a-a920-459c87207998'
+        context:
+          account: sops-sa
+          type: age-master-key
+      - arn: 'arn:aws:kms:us-west-2:644712362974:key/5dcee9a6-72f1-4a7f-bdfe-f7be9ad02b72'
+        context:
+          account: default
+          type: age-master-key
+  - path_regex: age-keys/customer-experience/.*\.txt$
+    unencrypted-suffix: '^(AGE-SECRET-KEY-*)$'
+    shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
+    key_groups:
+    #default
+    - kms:
+      - arn: 'arn:aws:kms:us-east-1:644712362974:key/9d11b3d7-3b7c-4cde-ad6a-75a2721e0e27'
+        context:
+          account: sops-sa
+          type: age-master-key
+      - arn: 'arn:aws:kms:us-east-1:644712362974:key/978a683a-4864-4537-88fb-2dc8ea4f8080'
+        context:
+          account: default
+          type: age-master-key
+    - kms:
+      - arn: 'arn:aws:kms:us-west-2:644712362974:key/9d994675-3143-4b2a-a920-459c87207998'
+        context:
+          account: sops-sa
+          type: age-master-key
+      - arn: 'arn:aws:kms:us-west-2:644712362974:key/5dcee9a6-72f1-4a7f-bdfe-f7be9ad02b72'
+        context:
+          account: default
+          type: age-master-key

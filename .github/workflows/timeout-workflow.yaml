@@ -1,0 +1,29 @@
+name: Cancel Job Timeout > 5m
+
+on:
+  # push:
+  #   branches:
+  #   - "main"
+  #   - "gh-action/workflow/INF-9277"
+  workflow_dispatch:
+  # pull_request:
+  #   branches: [ "main" ]
+
+jobs:
+  cancel:
+    name: monitor
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Monitor deployment for timeout and cancel if crossed the threshold
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_OWNER: ${{ github.repository_owner }}
+          REPO_NAME: ${{ github.event.repository.name }}
+        run: |
+          sleep 5m
+          gh -R $REPO_OWNER/$REPO_NAME run list -w .github/workflows/sops-workflow.yaml -s queued --json databaseId -q .[].databaseId | while read -r job_id; do \
+            gh -R $REPO_OWNER/$REPO_NAME run cancel "$job_id"
+          done
