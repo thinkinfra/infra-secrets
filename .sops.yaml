@@ -1,5 +1,21 @@
 destination_rules:
-# infra
+# infra - v1
+  - vault_path: "/"
+    vault_kv_mount_name: "secret" # default
+    vault_kv_version: 1 # default
+    path_regex: secrets/sandbox/infra/*
+    omit_extensions: true
+  - vault_path: "/"
+    vault_kv_mount_name: "secret" # default
+    vault_kv_version: 1 # default
+    path_regex: secrets/staging/infra/*
+    omit_extensions: true
+  - vault_path: "/"
+    vault_kv_mount_name: "secret" # default
+    vault_kv_version: 1 # default
+    path_regex: secrets/production/infra/*
+    omit_extensions: true
+# infra - v2
   - vault_path: "/"
     vault_kv_mount_name: "secret-v2" # default
     vault_kv_version: 2 # default
@@ -15,7 +31,23 @@ destination_rules:
     vault_kv_version: 2 # default
     path_regex: secrets/production/infra/*
     omit_extensions: true
-# customer-experience
+# customer-experience - v1
+  - vault_path: "/"
+    vault_kv_mount_name: "secret" # default
+    vault_kv_version: 1 # default
+    path_regex: secrets/sandbox/customer-experience/*
+    omit_extensions: true
+  - vault_path: "/"
+    vault_kv_mount_name: "secret" # default
+    vault_kv_version: 1 # default
+    path_regex: secrets/staging/customer-experience/*
+    omit_extensions: true
+  - vault_path: "/"
+    vault_kv_mount_name: "secret" # default
+    vault_kv_version: 1 # default
+    path_regex: secrets/production/customer-experience/*
+    omit_extensions: true
+# customer-experience - v2
   - vault_path: "/"
     vault_kv_mount_name: "secret-v2" # default
     vault_kv_version: 2 # default
@@ -31,7 +63,23 @@ destination_rules:
     vault_kv_version: 2 # default
     path_regex: secrets/production/customer-experience/*
     omit_extensions: true
-# lending
+# lending - v1
+  - vault_path: "/"
+    vault_kv_mount_name: "secret" # default
+    vault_kv_version: 1 # default
+    path_regex: secrets/sandbox/lending/*
+    omit_extensions: true
+  - vault_path: "/"
+    vault_kv_mount_name: "secret" # default
+    vault_kv_version: 1 # default
+    path_regex: secrets/staging/lending/*
+    omit_extensions: true
+  - vault_path: "/"
+    vault_kv_mount_name: "secret" # default
+    vault_kv_version: 1 # default
+    path_regex: secrets/production/lending/*
+    omit_extensions: true
+# lending - v2
   - vault_path: "/"
     vault_kv_mount_name: "secret-v2" # default
     vault_kv_version: 2 # default
