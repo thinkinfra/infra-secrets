@@ -1,0 +1,33 @@
+name: Scanning secrets via Gitleaks
+
+on:
+  # pull_request:
+  #   branches: [ "main" ]
+  # push:
+  #   branches:
+  #   - "main"
+  workflow_dispatch:
+  # schedule:
+  #   - cron: "0 4 * * *" # run once a day at 4 AM
+
+jobs:
+  gitleaks:
+    name: workflow -> gitleaks
+    runs-on: ubuntu-latest
+    environment:
+      name: system
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: ">1`"
+      - uses: actions/setup-node@v3.8.1
+        with:
+          node-version: 18
+          check-latest: true
+      - run: wget -O .gitleaks.toml https://raw.githubusercontent.com/zricethezav/gitleaks/master/config/gitleaks.toml
+      - uses: gitleaks/gitleaks-action@v2.3.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE_KEY}} # Only required for Organizations, not personal accounts.
+          GITLEAKS_ENABLE_SUMMARY: true
+          GITLEAKS_VERSION: latest

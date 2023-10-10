@@ -1,0 +1,8 @@
+# age master key
+# ageKeyFile: "./age-keys/common/master-key.txt"
+
+# cloud credentials
+awsProfile: Okta-Sandbox-Administrator
+# awsProfile: Okta-Staging-Administrator
+# awsProfile: Okta-Production-Administrator
+# gcpCredentialsPath: /home/user/Downloads/my-key.json

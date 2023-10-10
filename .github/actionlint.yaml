@@ -1,0 +1,24 @@
+problemMatcher:
+  - owner: actionlint
+    pattern:
+      - regexp: "^(?:\\x1b\\[\\d+m)?(.+?)(?:\\x1b\\[\\d+m)*:(?:\\x1b\\[\\d+m)*(\\d+)(?:\
+          \\x1b\\[\\d+m)*:(?:\\x1b\\[\\d+m)*(\\d+)(?:\\x1b\\[\\d+m)*:
+          (?:\\x1b\\[\\d+m)*(.+?)(?:\\x1b\\[\\d+m)* \\[(.+?)\\]$"
+        file: 1
+        line: 2
+        column: 3
+        message: 4
+        code: 5
+
+self-hosted-runner:
+  # Labels of self-hosted runner in array of string
+  labels:
+    - self-hosted-sandbox
+    - self-hosted-staging
+    - self-hosted-production
+
+# Configuration variables in array of strings defined in your repository or organization
+config-variables:
+  - DEFAULT_RUNNER
+  - JOB_NAME
+  - ENVIRONMENT_STAGE
