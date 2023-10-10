@@ -26,10 +26,10 @@ destination_rules:
     vault_kv_version: 2 # default
     path_regex: secrets/staging/infra/*
     omit_extensions: true
-  - vault_path: "/"
-    vault_kv_mount_name: "secret-v2" # default
+  - vault_path: "secret/"
+    vault_kv_mount_name: "secret-v2/" # default
     vault_kv_version: 2 # default
-    path_regex: secrets/production/infra/*
+    path_regex: production/infra/*
     omit_extensions: true
 # customer-experience - v1
   - vault_path: "/"
