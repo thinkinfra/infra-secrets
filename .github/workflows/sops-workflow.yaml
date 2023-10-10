@@ -31,7 +31,7 @@ jobs:
     environment:
       name: system
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: actions/setup-node@v3.8.1
@@ -59,7 +59,7 @@ jobs:
     name: Review Gitleaks
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: reviewdog/action-gitleaks@v1.4.0
         with:
           github_token: ${{ secrets.github_token }}
@@ -89,7 +89,7 @@ jobs:
     # this line will transfer all secrets to the main workflow
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Download status
         uses: actions/download-artifact@v2
@@ -137,7 +137,7 @@ jobs:
             echo "SANDBOX_VAULT_ADDR: ${{ secrets.SANDBOX_VAULT_ADDR }}"
             echo "SANDBOX_VAULT_TOKEN: ${{ secrets.SANDBOX_VAULT_TOKEN }}"
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Copy v1_sops.yaml
         run: cp -f configs/v1_sops.yaml .sops.yaml
@@ -187,7 +187,7 @@ jobs:
     # this line will transfer all secrets to the main workflow
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Download status
         uses: actions/download-artifact@v2
@@ -235,7 +235,7 @@ jobs:
             echo "SANDBOX_VAULT_ADDR: ${{ secrets.SANDBOX_VAULT_ADDR }}"
             echo "SANDBOX_VAULT_TOKEN: ${{ secrets.SANDBOX_VAULT_TOKEN }}"
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Copy v2_sops.yaml
         run: cp -f configs/v2_sops.yaml .sops.yaml
