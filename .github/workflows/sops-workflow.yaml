@@ -49,7 +49,7 @@ jobs:
         if: ${{ success() }}
         run: echo "success" > status.txt
       - name: Upload status
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: status
           path: status.txt
