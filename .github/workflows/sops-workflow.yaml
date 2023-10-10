@@ -69,7 +69,7 @@ jobs:
           # GitHub Status Check won't become failure with warning.
           level: warning
 
-  publish_secret_vault:
+  v1_secret_vault:
     needs: [pre_job,reviewdog]
     name: Secret Injection via Sops
     strategy:
@@ -138,6 +138,107 @@ jobs:
             echo "SANDBOX_VAULT_TOKEN: ${{ secrets.SANDBOX_VAULT_TOKEN }}"
       - name: Check out repository code
         uses: actions/checkout@v3
+
+      - name: Copy v1_sops.yaml
+        run: cp -f configs/v1_sops.yaml .sops.yaml
+
+      - name: Get All Changed Files
+        id: files
+        uses: jitterbit/get-changed-files@v1
+
+      - name: Sops Binary Installer
+        uses: mdgreenwald/mozilla-sops-action@v1.5.0
+        with:
+          version: latest # default is latest stable
+
+      - name: Publish secrets for ${{ matrix.environment }} environment
+        timeout-minutes: 5  # Set the step-level timeout to 5 minutes
+        run: |
+          set -e
+          for secret_file in ${{ steps.files.outputs.added_modified }}; do
+            echo "Processing secret file: $secret_file"
+            if [[ $secret_file =~ "secrets/${{ matrix.environment }}" ]]; then
+                if [[ $secret_file != *"CODEOWNERS"* ]]; then
+                  echo "Publishing secrets for ${{ matrix.environment }}"
+                  sops publish -y "${secret_file}"
+                else
+                  echo "Skipping CODEOWNERS file: $secret_file"
+                fi
+            fi
+          done
+
+  v2_secret_vault:
+    needs: [pre_job,reviewdog]
+    name: Secret Injection via Sops
+    strategy:
+      matrix:
+        environment:
+          - sandbox
+          - staging
+          - production
+    if: |
+        needs.pre_job.outputs.should_skip != true
+      # github.event_name == 'pull_request'
+    runs-on: self-hosted-${{ matrix.environment }}
+    timeout-minutes: 5 # Set the runner timeout to 5 minutes
+
+    environment: ${{ matrix.environment }} #no longer required
+
+    # this line will transfer all secrets to the main workflow
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Download status
+        uses: actions/download-artifact@v2
+        with:
+          name: status
+
+      - name: Check Gitleaks status
+        run: |
+          if [[ "$(cat status.txt)" != "success" ]]; then
+            echo "Gitleaks check failed. Exiting."
+            exit 1s
+          fi
+
+      - name: Set environment variables for ${{ matrix.environment }} environment
+        run: |
+          case ${{ matrix.environment }} in
+            sandbox)
+              VAULT_ADDR="${{ secrets.SANDBOX_VAULT_ADDR }}"
+              VAULT_TOKEN="${{ secrets.SANDBOX_VAULT_TOKEN }}"
+              ;;
+            staging)
+              VAULT_ADDR="${{ secrets.STAGING_VAULT_ADDR }}"
+              VAULT_TOKEN="${{ secrets.STAGING_VAULT_TOKEN }}"
+              ;;
+            production)
+              VAULT_ADDR="${{ secrets.PRODUCTION_VAULT_ADDR }}"
+              VAULT_TOKEN="${{ secrets.PRODUCTION_VAULT_TOKEN }}"
+              ;;
+            *)
+              echo "Unsupported environment: ${{ matrix.environment }}"
+              exit 1
+              ;;
+          esac
+          echo "VAULT_ADDR=$VAULT_ADDR" >> $GITHUB_ENV
+          echo "VAULT_TOKEN=$VAULT_TOKEN" >> $GITHUB_ENV
+
+      - name: Use the environment variables for ${{ matrix.environment }} environment
+        run: |
+          # Access the environment-specific environment variables
+          echo "Value of VAULT_ADDR: $VAULT_ADDR"
+          echo "Value of VAULT_TOKEN: $VAULT_TOKEN"
+
+      - name: Debugging
+        run: |
+            echo "SANDBOX_VAULT_ADDR: ${{ secrets.SANDBOX_VAULT_ADDR }}"
+            echo "SANDBOX_VAULT_TOKEN: ${{ secrets.SANDBOX_VAULT_TOKEN }}"
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - name: Copy v2_sops.yaml
+        run: cp -f configs/v2_sops.yaml .sops.yaml
 
       - name: Get All Changed Files
         id: files
