@@ -3,3 +3,13 @@ repos:
     rev: v8.18.0
     hooks:
       - id: gitleaks
+
+  - repo: https://github.com/mpalmer/action-validator
+    rev: v0.5.3
+    hooks:
+      - id: action-validator
+
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.6.26
+    hooks:
+      - id: actionlint
