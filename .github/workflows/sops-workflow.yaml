@@ -92,7 +92,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Download status
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: status
 
@@ -190,7 +190,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Download status
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: status
 
