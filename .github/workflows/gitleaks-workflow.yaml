@@ -1,13 +1,13 @@
 name: Scanning secrets via Gitleaks
 
 on:
-  pull_request:
-    branches: [ "main" ]
-  push:
-    branches:
-    - "main"
-    - "gh-action/workflow/INF-9277"
-  # workflow_dispatch:
+  # pull_request:
+  #   branches: [ "main" ]
+  # push:
+  #   branches:
+  #   - "main"
+  #   - "gh-action/workflow/INF-9277"
+  workflow_dispatch:
   # schedule:
   #   - cron: "0 4 * * *" # run once a day at 4 AM
 

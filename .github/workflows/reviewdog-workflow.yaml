@@ -5,17 +5,17 @@ on:
   #   branches:
   #   - "main"
   #   - "gh-action/workflow/INF-9277"
-  # workflow_dispatch:
+  workflow_dispatch:
     # pull_request:
       #   branches: [ "main" ]
       # schedule:
         #   - cron: "0 4 * * *" # run once a day at 4 AM
-  workflow_run:
-    workflows: ["Main Workflow"]
-    branches: [main]
-    types:
-      - completed
-      - requested
+  # workflow_run:
+  #   workflows: ["Main Workflow"]
+  #   branches: [main]
+  #   types:
+  #     - completed
+  #     - requested
 
 jobs:
   reviewdog:

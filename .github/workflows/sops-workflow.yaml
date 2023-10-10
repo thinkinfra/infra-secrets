@@ -1,25 +1,20 @@
 name: Inject secrets to Vault via Sops
 
 on:
-  workflow_run:
-    workflows: ["Gitleaks Workflow"]
-    branches: [main,gh-action/workflow/INF-9277]
-    types:
-      - completed
-      - requested
-  # push:
-  #   branches:
-  #     - "main"
-  #     - "gh-action/workflow/INF-9277"
-    # paths:
-    #   - "secrets/**"
-  # workflow_dispatch:
-# pull_request:
-  #   branches: [ "main" ]
+  push:
+    branches:
+      - "main"
+      - "gh-action/workflow/INF-9277"
+    paths:
+      - "secrets/**"
+  workflow_dispatch:
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
 
   pre_job:
+    name: Checking duplicate GH Action
     runs-on: self-hosted
     outputs:
       should_skip: ${{ steps.skip_check.outputs.should_skip }}
@@ -29,29 +24,54 @@ jobs:
         with:
           skip_after_successful_duplicate: 'true'
 
-  # gitleaks:
-  #   needs: [pre_job]
-  #   runs-on: self-hosted
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #       with:
-  #         fetch-depth: 0
-  #     - uses: actions/setup-node@v3.8.1
-  #       with:
-  #         node-version: 18
-  #         check-latest: true
-  #     - name: Running secret scanner
-  #       uses: ./.github/workflows/gitleaks-workflow.yaml
+  gitleaks:
+    needs: [pre_job]
+    name: Scanning secrets via Gitleaks
+    runs-on: ubuntu-latest #self-hosted -> https://github.com/gitleaks/gitleaks-action/issues/125
+    environment:
+      name: system
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v3.8.1
+        with:
+          node-version: 18
+          check-latest: true
+      - run: wget -O .gitleaks.toml https://raw.githubusercontent.com/zricethezav/gitleaks/master/config/gitleaks.toml
+      - uses: gitleaks/gitleaks-action@v2.3.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE_KEY}} # Only required for Organizations, not personal accounts.
+          GITLEAKS_ENABLE_SUMMARY: true
+          GITLEAKS_VERSION: latest
+      - name: Save success status
+        if: ${{ success() }}
+        run: echo "success" > status.txt
+      - name: Upload status
+        uses: actions/upload-artifact@v2
+        with:
+          name: status
+          path: status.txt
 
-  # reviewdog:
-  #   runs-on: self-hosted
-  #   needs: [pre_job,reviewdog]
-  #   steps:
-  #     - name: Running secret scanner
-  #       uses: ./.github/workflows/reviewdog-workflow.yaml
+  reviewdog:
+    needs: [pre_job]
+    name: Review Gitleaks
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v3
+      - uses: reviewdog/action-gitleaks@v1.4.0
+        with:
+          github_token: ${{ secrets.github_token }}
+          # Change reviewdog reporter if you need [github-pr-check,github-check,github-pr-review].
+          reporter: github-pr-review
+          # Change reporter level if you need.
+          # GitHub Status Check won't become failure with warning.
+          level: warning
 
   publish_secret_vault:
-    needs: [pre_job]
+    needs: [pre_job,reviewdog]
+    name: Secret Injection via Sops
     strategy:
       matrix:
         environment:
@@ -59,19 +79,29 @@ jobs:
           - staging
           - production
     if: |
-      ${{ needs.pre_job.outputs.should_skip != 'true' }}
+        needs.pre_job.outputs.should_skip != true
       # github.event_name == 'pull_request'
-
     runs-on: self-hosted-${{ matrix.environment }}
     timeout-minutes: 5 # Set the runner timeout to 5 minutes
 
     environment: ${{ matrix.environment }} #no longer required
 
     # this line will transfer all secrets to the main workflow
-    name: sops
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Download status
+        uses: actions/download-artifact@v2
+        with:
+          name: status
+
+      - name: Check Gitleaks status
+        run: |
+          if [[ "$(cat status.txt)" != "success" ]]; then
+            echo "Gitleaks check failed. Exiting."
+            exit 1s
+          fi
 
       - name: Set environment variables for ${{ matrix.environment }} environment
         run: |
@@ -93,7 +123,6 @@ jobs:
               exit 1
               ;;
           esac
-
           echo "VAULT_ADDR=$VAULT_ADDR" >> $GITHUB_ENV
           echo "VAULT_TOKEN=$VAULT_TOKEN" >> $GITHUB_ENV
 
@@ -107,7 +136,6 @@ jobs:
         run: |
             echo "SANDBOX_VAULT_ADDR: ${{ secrets.SANDBOX_VAULT_ADDR }}"
             echo "SANDBOX_VAULT_TOKEN: ${{ secrets.SANDBOX_VAULT_TOKEN }}"
-
       - name: Check out repository code
         uses: actions/checkout@v3
 
@@ -127,7 +155,11 @@ jobs:
           for secret_file in ${{ steps.files.outputs.added_modified }}; do
             echo "Processing secret file: $secret_file"
             if [[ $secret_file =~ "secrets/${{ matrix.environment }}" ]]; then
-              echo "Publishing secrets for ${{ matrix.environment }}"
-              sops publish -y "${secret_file}"
+                if [[ $secret_file != *"CODEOWNERS"* ]]; then
+                  echo "Publishing secrets for ${{ matrix.environment }}"
+                  sops publish -y "${secret_file}"
+                else
+                  echo "Skipping CODEOWNERS file: $secret_file"
+                fi
             fi
           done
