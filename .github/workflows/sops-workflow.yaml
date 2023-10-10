@@ -71,7 +71,7 @@ jobs:
 
   v1_secret_vault:
     needs: [pre_job,reviewdog]
-    name: Secret Injection via Sops
+    name: "v1 Secret Injection via Sops"
     strategy:
       matrix:
         environment:
@@ -169,7 +169,7 @@ jobs:
 
   v2_secret_vault:
     needs: [pre_job,reviewdog]
-    name: Secret Injection via Sops
+    name: "v2 Secret Injection via Sops"
     strategy:
       matrix:
         environment:
