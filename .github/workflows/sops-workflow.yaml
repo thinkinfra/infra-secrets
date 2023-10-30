@@ -4,16 +4,16 @@ on:
   push:
     branches:
       - "main"
-      - "gh-action/workflow/INF-9277"
     paths:
       - "secrets/**"
   workflow_dispatch:
   pull_request:
-    branches: [ "main", "gh-action/workflow/INF-9277" ]
+    branches: [ "main" ]
 
 jobs:
 
   pre_job:
+    if: github.event_name == 'pull_request'
     name: Checking duplicate GH Action
     runs-on: self-hosted
     outputs:
@@ -25,6 +25,7 @@ jobs:
           skip_after_successful_duplicate: 'true'
 
   gitleaks:
+    if: github.event_name == 'pull_request'
     needs: [pre_job]
     name: Scanning secrets via Gitleaks
     runs-on: ubuntu-latest #self-hosted -> https://github.com/gitleaks/gitleaks-action/issues/125
@@ -55,6 +56,7 @@ jobs:
           path: status.txt
 
   reviewdog:
+    if: github.event_name == 'pull_request'
     needs: [pre_job]
     name: Review Gitleaks
     runs-on: self-hosted
@@ -79,8 +81,9 @@ jobs:
           - staging
           - production
     if: |
-        needs.pre_job.outputs.should_skip != true
-      # github.event_name == 'pull_request'
+          github.event_name == 'push'
+        # needs.pre_job.outputs.should_skip != true
+        # github.event_name == 'pull_request'
     runs-on: self-hosted-${{ matrix.environment }}
     timeout-minutes: 5 # Set the runner timeout to 5 minutes
 
@@ -177,8 +180,9 @@ jobs:
           - staging
           - production
     if: |
-        needs.pre_job.outputs.should_skip != true
-      # github.event_name == 'pull_request'
+          github.event_name == 'push'
+        # needs.pre_job.outputs.should_skip != true
+        # github.event_name == 'pull_request'
     runs-on: self-hosted-${{ matrix.environment }}
     timeout-minutes: 5 # Set the runner timeout to 5 minutes
 
