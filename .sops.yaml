@@ -158,7 +158,7 @@ creation_rules:
     - age:
         - 'age1kqcdx46gv7stajxenms5t83af8huc39qe450kzen55sk3kg4fdaqek48m0'
   - path_regex: secrets/sandbox/lending/.*\.yaml$
-    shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
+    shamir_threshold: 3 # master keys from two of the three different key groups in order to decrypt the file
     key_groups:
     #default
     - kms:
