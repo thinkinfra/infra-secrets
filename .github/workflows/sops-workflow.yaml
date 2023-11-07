@@ -9,6 +9,8 @@ on:
   workflow_dispatch:
   pull_request:
     branches: [ "main" ]
+    types:
+      - closed
 
 jobs:
 
@@ -81,7 +83,7 @@ jobs:
           - staging
           - production
     if: |
-          github.event_name == 'push'
+          github.event.pull_request.merged == true
         # needs.pre_job.outputs.should_skip != true
         # github.event_name == 'pull_request'
     runs-on: self-hosted-${{ matrix.environment }}
@@ -180,7 +182,7 @@ jobs:
           - staging
           - production
     if: |
-          github.event_name == 'push'
+          github.event.pull_request.merged == true
         # needs.pre_job.outputs.should_skip != true
         # github.event_name == 'pull_request'
     runs-on: self-hosted-${{ matrix.environment }}
