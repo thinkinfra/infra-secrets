@@ -1,0 +1,40 @@
+name: Environment Deployment Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Select Environment'
+        required: true
+        type: choice
+        options:
+          - production
+          - staging
+          - sandbox
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Environment
+        run: echo "Deploying to ${{ github.event.inputs.environment }}"
+
+      # Add additional steps for your deployment process here.
+      # You can use conditional steps based on the input like this:
+      - name: Deploy to Production
+        if: ${{ github.event.inputs.environment == 'production' }}
+        run: echo "Deploying to Production"
+        # Add your deployment scripts or commands here for production
+
+      - name: Deploy to Staging
+        if: ${{ github.event.inputs.environment == 'staging' }}
+        run: echo "Deploying to Staging"
+        # Add your deployment scripts or commands here for staging
+
+      - name: Deploy to Sandbox
+        if: ${{ github.event.inputs.environment == 'sandbox' }}
+        run: echo "Deploying to Sandbox"
+        # Add your deployment scripts or commands here for sandbox
