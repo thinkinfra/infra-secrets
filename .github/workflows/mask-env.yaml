@@ -1,0 +1,30 @@
+name: Mask Secret Workflow
+
+on: [push, workflow_dispatch]
+
+jobs:
+  mask-and-cleanup:
+    runs-on: ubuntu-latest
+    env:
+      MY_VARIABLE: 'value-to-be-masked' # Replace this with your actual variable
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '14'
+
+    - name: Install dependencies
+      run: npm install @actions/core
+
+    - name: Mask secret
+      run: node scripts/mask-secret.js
+      env:
+        MY_SECRET: ${{ env.MY_VARIABLE }}
+
+    - name: Cleanup
+      run: echo "Performing cleanup tasks"
+
