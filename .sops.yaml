@@ -128,6 +128,8 @@ creation_rules:
     #customer-experience
     - age:
         - 'age1dvux7y9uxf362c8j9tw6ug3acmhjdljwzx3h5asrp47sujrdyecq42gqx4'
+    - pgp:
+        - '5E4BB3BCD0C739BC2AEAB6A69063DD9B872EC7E4'
   - path_regex: secrets/sandbox/infra/.*\.yaml$
     shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
     key_groups:
@@ -157,6 +159,8 @@ creation_rules:
     #infra
     - age:
         - 'age1kqcdx46gv7stajxenms5t83af8huc39qe450kzen55sk3kg4fdaqek48m0'
+    - pgp:
+        - '1271E6EEDE08F1AD4C250DE9DC6F51D4B44CA494'
   - path_regex: secrets/sandbox/lending/.*\.yaml$
     shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
     key_groups:
@@ -186,6 +190,8 @@ creation_rules:
     #lending
     - age:
         - 'age1vulxu3tcmzc7uf4nk7m7fsta2mj475q50gwgma2swsrgzds62vcs3zw5l2'
+    - pgp:
+        - 'A5B95E2634DDE1BE658EFC9CFCD7CD6C258E598D'
 
 # staging
   - path_regex: secrets/staging/customer-experience/.*\.yaml$
@@ -207,6 +213,8 @@ creation_rules:
     #customer-experience
     - age:
         - 'age1dvux7y9uxf362c8j9tw6ug3acmhjdljwzx3h5asrp47sujrdyecq42gqx4'
+    - pgp:
+        - '5E4BB3BCD0C739BC2AEAB6A69063DD9B872EC7E4'
   - path_regex: secrets/staging/infra/.*\.yaml$
     shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
     key_groups:
@@ -226,6 +234,8 @@ creation_rules:
     #infra
     - age:
         - 'age1kqcdx46gv7stajxenms5t83af8huc39qe450kzen55sk3kg4fdaqek48m0'
+    - pgp:
+        - '1271E6EEDE08F1AD4C250DE9DC6F51D4B44CA494'
   - path_regex: secrets/staging/lending/.*\.yaml$
     shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
     key_groups:
@@ -245,7 +255,8 @@ creation_rules:
     #lending
     - age:
         - 'age1vulxu3tcmzc7uf4nk7m7fsta2mj475q50gwgma2swsrgzds62vcs3zw5l2'
-
+    - pgp:
+        - 'A5B95E2634DDE1BE658EFC9CFCD7CD6C258E598D'
 # production
   - path_regex: secrets/production/customer-experience/.*\.yaml$
     shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
@@ -266,6 +277,8 @@ creation_rules:
     #customer-experience
     - age:
         - 'age1dvux7y9uxf362c8j9tw6ug3acmhjdljwzx3h5asrp47sujrdyecq42gqx4'
+    - pgp:
+        - '5E4BB3BCD0C739BC2AEAB6A69063DD9B872EC7E4'
   - path_regex: secrets/production/infra/.*\.yaml$
     shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
     key_groups:
@@ -285,6 +298,8 @@ creation_rules:
     #infra
     - age:
         - 'age1kqcdx46gv7stajxenms5t83af8huc39qe450kzen55sk3kg4fdaqek48m0'
+    - pgp:
+        - '1271E6EEDE08F1AD4C250DE9DC6F51D4B44CA494'
   - path_regex: secrets/production/lending/.*\.yaml$
     shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
     key_groups:
@@ -304,6 +319,8 @@ creation_rules:
     #lending
     - age:
         - 'age1vulxu3tcmzc7uf4nk7m7fsta2mj475q50gwgma2swsrgzds62vcs3zw5l2'
+    - pgp:
+        - 'A5B95E2634DDE1BE658EFC9CFCD7CD6C258E598D'
 
 # path: /age-keys
   - path_regex: age-keys/infra/.*\.txt$
