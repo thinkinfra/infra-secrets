@@ -123,8 +123,8 @@ creation_rules:
     - age:
         - 'age1vulxu3tcmzc7uf4nk7m7fsta2mj475q50gwgma2swsrgzds62vcs3zw5l2'
     - pgp:
-        - '7EFF431796D90A32826B4C84178F957C4F712CA5'
         - '22B7CFB43CAF1238857F27E0DC8C6A38337BB1F0'
+        - '7EFF431796D90A32826B4C84178F957C4F712CA5'
     #default
     # - kms:
     #   - arn: 'arn:aws:kms:us-east-1:644712362974:key/9d11b3d7-3b7c-4cde-ad6a-75a2721e0e27'
