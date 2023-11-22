@@ -194,7 +194,7 @@ jobs:
               # Construct the Vault path for double-dot files
               full_vault_path="secret/data/$modified_path"
               # Decrypt with sops and upload to Vault
-              sops -d $secret_file | vault kv put $full_vault_path -
+              sops --config configs/v1_sops.yaml -d $secret_file | vault kv put $full_vault_path -
 
             elif [[ $secret_file =~ "secrets/${{ matrix.environment }}" && $secret_file != *"CODEOWNERS"* ]]; then
               echo "Publishing secrets for ${{ matrix.environment }}"
