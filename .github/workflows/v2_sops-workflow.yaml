@@ -240,10 +240,12 @@ jobs:
                   --data @decrypted-file.json \
                   $VAULT_ADDR/v1/$vault_path
 
-            else
+            elif [[ $secret_file =~ "secrets/${{ matrix.environment }}" && $secret_file != *"CODEOWNERS"* ]]; then
               echo "Publishing secret using sops: $secret_file"
               # Here you can adjust the sops publish command to fit your use case
               sops publish -y "$secret_file"
+            else
+              echo "Skipping file: $secret_file"
             fi
           done
 
