@@ -205,7 +205,8 @@ jobs:
       #       fi
       #     done
 
-      - name: Process Files for Environment ${{ matrix.environment }}
+      # - name: Process Files for Environment ${{ matrix.environment }}
+      - name: Process Files for Environment
         run: |
           set -e
           for secret_file in ${{ steps.files.outputs.added_modified }}; do
