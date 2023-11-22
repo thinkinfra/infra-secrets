@@ -176,32 +176,72 @@ jobs:
       #     done
 
       # NEW
-      - name: Publish secrets for ${{ matrix.environment }} environment
-        timeout-minutes: 5  # Set the step-level timeout to 5 minutes
+      # - name: Publish secrets for ${{ matrix.environment }} environment
+      #   timeout-minutes: 5  # Set the step-level timeout to 5 minutes
+      #   run: |
+      #     set -e
+      #     for secret_file in ${{ steps.files.outputs.added_modified }}; do
+      #       echo "Processing secret file: $secret_file"
+
+      #       # Check if the file has a pattern with two periods before .yaml
+      #       if [[ $secret_file =~ \..*\.yaml$ ]]; then
+      #         echo "Processing double-dot file: $secret_file"
+      #         # Custom logic for processing double-dot files
+      #         # Extract the base path without the extension
+      #         base_path=$(echo $secret_file | sed 's/\.yaml$//')
+      #         # Replace '/' with '.' and append the file name without extension
+      #         modified_path=$(echo $base_path | sed 's/\//./g')
+      #         # Construct the Vault path for double-dot files
+      #         full_vault_path="secret/data/$modified_path"
+      #         # Decrypt with sops and upload to Vault
+      #         sops --config configs/v1_sops.yaml -d $secret_file | vault kv put secret/$full_vault_path -
+
+      #       elif [[ $secret_file =~ "secrets/${{ matrix.environment }}" && $secret_file != *"CODEOWNERS"* ]]; then
+      #         echo "Publishing secrets for ${{ matrix.environment }}"
+      #         sops publish -y "${secret_file}"
+
+      #       else
+      #         echo "Skipping file: $secret_file"
+      #       fi
+      #     done
+
+      - name: Process Files for Environment ${{ matrix.environment }}
         run: |
           set -e
-          for secret_file in ${{ steps.files.outputs.added_modified }}; do
-            echo "Processing secret file: $secret_file"
+          for secret_file in $(find . -name '*.yaml' -path "./secrets/${{ matrix.environment }}/**"); do
+            echo "Processing secret file in ${{ matrix.environment }}: $secret_file"
 
-            # Check if the file has a pattern with two periods before .yaml
+            # Check if the file is a double-dot file
             if [[ $secret_file =~ \..*\.yaml$ ]]; then
               echo "Processing double-dot file: $secret_file"
-              # Custom logic for processing double-dot files
-              # Extract the base path without the extension
-              base_path=$(echo $secret_file | sed 's/\.yaml$//')
-              # Replace '/' with '.' and append the file name without extension
-              modified_path=$(echo $base_path | sed 's/\//./g')
-              # Construct the Vault path for double-dot files
-              full_vault_path="secret/data/$modified_path"
-              # Decrypt with sops and upload to Vault
-              sops --config configs/v1_sops.yaml -d $secret_file | vault kv put $full_vault_path -
 
-            elif [[ $secret_file =~ "secrets/${{ matrix.environment }}" && $secret_file != *"CODEOWNERS"* ]]; then
-              echo "Publishing secrets for ${{ matrix.environment }}"
-              sops publish -y "${secret_file}"
+              # Decrypt with sops
+              sops -d $secret_file > decrypted-file.yaml
+
+              # Convert YAML to JSON
+              pip install yq
+              yq eval -o=json decrypted-file.yaml > decrypted-file.json
+
+              # Extract secret_name and sub-path from file name
+              filename=$(basename "$secret_file")
+              secret_name="${filename%%.*}"
+              sub_path="${filename%.*}"
+              sub_path="${sub_path#*.}"
+
+              # Construct the Vault path for double-dot files
+              vault_path="secret/data/$secret_name/$sub_path"
+
+              # Upload to Vault using curl
+              curl -H "X-Vault-Token: $VAULT_TOKEN" \
+                  -H "Content-Type: application/json" \
+                  --request POST \
+                  --data @decrypted-file.json \
+                  $VAULT_ADDR/v1/$vault_path
 
             else
-              echo "Skipping file: $secret_file"
+              echo "Publishing secret using sops: $secret_file"
+              # Here you can adjust the sops publish command to fit your use case
+              sops publish -y "$secret_file"
             fi
           done
 
