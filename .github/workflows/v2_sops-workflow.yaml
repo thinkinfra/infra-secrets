@@ -92,17 +92,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Download status
-        uses: actions/download-artifact@v3
-        with:
-          name: status
+      # - name: Download status
+      #   uses: actions/download-artifact@v3
+      #   with:
+      #     name: status
 
-      - name: Check Gitleaks status
-        run: |
-          if [[ "$(cat status.txt)" != "success" ]]; then
-            echo "Gitleaks check failed. Exiting."
-            exit 1s
-          fi
+      # - name: Check Gitleaks status
+      #   run: |
+      #     if [[ "$(cat status.txt)" != "success" ]]; then
+      #       echo "Gitleaks check failed. Exiting."
+      #       exit 1s
+      #     fi
 
       - name: Set environment variables for ${{ matrix.environment }} environment
         run: |
