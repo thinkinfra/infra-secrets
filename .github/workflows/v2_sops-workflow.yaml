@@ -220,7 +220,8 @@ jobs:
               sops -d $secret_file > decrypted-file.yaml
 
               # Convert YAML to JSON
-              pip install yq
+              wget https://github.com/mikefarah/yq/releases/download/v4.13.3/yq_linux_amd64 -O yq && chmod +x yq
+              sudo mv yq /usr/local/bin/
               yq eval -o=json decrypted-file.yaml > decrypted-file.json
 
               # Extract secret_name and sub-path from file name
