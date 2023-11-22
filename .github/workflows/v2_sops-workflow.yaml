@@ -159,8 +159,11 @@ jobs:
           sudo apt-get update && sudo apt-get install vault
 
       - name: Log in to Vault
+        env:
+          VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
+          VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
         run: |
-          vault login ${{ secrets.VAULT_TOKEN }}
+          echo $VAULT_TOKEN | vault login - # Use '-' to read from stdin
 
       # OLD
       # - name: Publish secrets for ${{ matrix.environment }} environment
