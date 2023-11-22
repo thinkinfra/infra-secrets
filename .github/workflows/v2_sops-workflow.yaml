@@ -10,17 +10,17 @@ on:
 
 jobs:
 
-  pre_job:
-    # if: github.event_name == 'pull_request'
-    name: Checking duplicate GH Action
-    runs-on: self-hosted
-    outputs:
-      should_skip: ${{ steps.skip_check.outputs.should_skip }}
-    steps:
-      - id: skip_check
-        uses: fkirc/skip-duplicate-actions@v5.3.1
-        with:
-          skip_after_successful_duplicate: 'true'
+  # pre_job:
+  #   # if: github.event_name == 'pull_request'
+  #   name: Checking duplicate GH Action
+  #   runs-on: self-hosted
+  #   outputs:
+  #     should_skip: ${{ steps.skip_check.outputs.should_skip }}
+  #   steps:
+  #     - id: skip_check
+  #       uses: fkirc/skip-duplicate-actions@v5.3.1
+  #       with:
+  #         skip_after_successful_duplicate: 'true'
 
   # gitleaks:
   #   # if: github.event_name == 'pull_request'
