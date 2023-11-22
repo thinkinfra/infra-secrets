@@ -85,9 +85,9 @@ jobs:
           - staging
           - production
     if: |
-          github.event.pull_request.merged == true
-        # needs.pre_job.outputs.should_skip != true
-        # github.event_name == 'pull_request'
+          github.event_name == 'pull_request'
+      # github.event.pull_request.merged == true
+
     runs-on: self-hosted-${{ matrix.environment }}
     timeout-minutes: 5 # Set the runner timeout to 5 minutes
 
