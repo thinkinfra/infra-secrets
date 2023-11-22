@@ -148,15 +148,15 @@ jobs:
         with:
           version: latest # default is latest stable
 
-      - name: Install Vault CLI
-        run: |
-          curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
-          sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
-          sudo apt-get update && sudo apt-get install vault
+      # - name: Install Vault CLI
+      #   run: |
+      #     curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+      #     sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+      #     sudo apt-get update && sudo apt-get install vault
 
-      - name: Log in to Vault
-        run: |
-          vault login -no-print -address=$VAULT_ADDR token=$VAULT_TOKEN
+      # - name: Log in to Vault
+      #   run: |
+      #     vault login -no-print -address=$VAULT_ADDR token=$VAULT_TOKEN
 
       # OLD
       # - name: Publish secrets for ${{ matrix.environment }} environment
@@ -208,7 +208,7 @@ jobs:
       - name: Process Files for Environment ${{ matrix.environment }}
         run: |
           set -e
-          for secret_file in $(find . -name '*.yaml' -path "./secrets/${{ matrix.environment }}/**"); do
+          for secret_file in ${{ steps.files.outputs.added_modified }}; do
             echo "Processing secret file in ${{ matrix.environment }}: $secret_file"
 
             # Check if the file is a double-dot file
