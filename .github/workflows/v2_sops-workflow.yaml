@@ -152,6 +152,16 @@ jobs:
         with:
           version: latest # default is latest stable
 
+      - name: Install Vault CLI
+        run: |
+          curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+          sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+          sudo apt-get update && sudo apt-get install vault
+
+      - name: Log in to Vault
+        run: |
+          vault login ${{ secrets.VAULT_TOKEN }}
+
       # OLD
       # - name: Publish secrets for ${{ matrix.environment }} environment
       #   timeout-minutes: 5  # Set the step-level timeout to 5 minutes
