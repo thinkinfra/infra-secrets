@@ -11,7 +11,7 @@ on:
 jobs:
 
   pre_job:
-    if: github.event_name == 'pull_request'
+    # if: github.event_name == 'pull_request'
     name: Checking duplicate GH Action
     runs-on: self-hosted
     outputs:
@@ -23,7 +23,7 @@ jobs:
           skip_after_successful_duplicate: 'true'
 
   gitleaks:
-    if: github.event_name == 'pull_request'
+    # if: github.event_name == 'pull_request'
     needs: [pre_job]
     name: Scanning secrets via Gitleaks
     runs-on: ubuntu-latest #self-hosted -> https://github.com/gitleaks/gitleaks-action/issues/125
@@ -54,7 +54,7 @@ jobs:
           path: status.txt
 
   reviewdog:
-    if: github.event_name == 'pull_request'
+    # if: github.event_name == 'pull_request'
     needs: [pre_job]
     name: Review Gitleaks
     runs-on: self-hosted
@@ -78,8 +78,8 @@ jobs:
           - sandbox
           - staging
           - production
-    if: |
-          github.event_name == 'pull_request'
+    # if: |
+    #       github.event_name == 'pull_request'
       # github.event.pull_request.merged == true
 
     runs-on: self-hosted-${{ matrix.environment }}
