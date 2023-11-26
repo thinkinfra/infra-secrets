@@ -114,73 +114,56 @@ jobs:
           echo "VAULT_ADDR=$VAULT_ADDR" >> $GITHUB_ENV
           echo "VAULT_TOKEN=$VAULT_TOKEN" >> $GITHUB_ENV
 
-      # - if: env.RELEVANT_CHANGES == 'true'
-      #   name: Define Secret File Path
-      #   run: |
-      #     SECRET_FILE_PATH="secrets/${{ matrix.environment }}/lending"
-      #     echo "SECRET_FILE_PATH=$SECRET_FILE_PATH" >> $GITHUB_ENV
-
-      # - if: env.RELEVANT_CHANGES == 'true'
-      #   name: Define Temporary Decrypted File Path
-      #   run: |
-      #     DECRYPTED_FILE_PATH="$(dirname ${{ env.SECRET_FILE_PATH }})/temp_decrypted_file.yaml"
-      #     echo "Creating temporary decrypted file directory: $TEMP_DECRYPTED_PATH"
-      #     mkdir -p $DECRYPTED_FILE_PATH
-      #     echo "DECRYPTED_FILE_PATH=$DECRYPTED_FILE_PATH" >> $GITHUB_ENV
-
       - if: env.RELEVANT_CHANGES == 'true'
-        name: Process Secret Files
+        name: Decrypt Double-Dotted Secret Files
         run: |
           set -e
           IFS=' ' read -r -a modified_files <<< "${{ steps.files.outputs.added_modified }}"
           for file in "${modified_files[@]}"; do
             if [[ $(basename "$file") =~ \..+\.yaml$ ]]; then
-              # Prepare the directory and file for decryption
               decrypted_directory="secrets/${{ matrix.environment }}/lending/decrypted"
               mkdir -p "$decrypted_directory"
               decrypted_file_path="$decrypted_directory/$(basename $file)"
               touch "$decrypted_file_path"
 
-              # Attempt decryption but ignore errors
               echo "Decrypting double-dot file: $file"
               sops --verbose -d $file > $decrypted_file_path || echo "Decryption error, might continue if threshold is met"
+            fi
+          done
+          # Debug: Check the contents of the decrypted YAML file
+          echo "Decrypted YAML content:"
+          cat "$decrypted_file_path"
 
-              # Debug: Check the contents of the decrypted YAML file
-              echo "Decrypted YAML content:"
-              cat "$decrypted_file_path"
+      - if: env.RELEVANT_CHANGES == 'true'
+        name: Process Decrypted Secret Files
+        run: |
+          set -e
+          decrypted_directory="secrets/${{ matrix.environment }}/lending/decrypted"
+          for decrypted_file in "$decrypted_directory"/*.yaml; do
+            if [ -s "$decrypted_file" ]; then
+              echo "Processing decrypted file: $decrypted_file"
 
-              # Check if the file has been successfully decrypted
-              if [ -s "$decrypted_file_path" ]; then
-                echo "File decrypted successfully, continuing with further processing"
+              # Convert YAML to JSON using yq
+              pip install yq
+              yq -r . "$decrypted_file" > "${decrypted_file%.yaml}.json"
 
-                # Convert YAML to JSON using yq
-                pip install yq
-                yq -r . "$decrypted_file_path" > "${decrypted_file_path%.yaml}.json" || echo "yq conversion failed"
+              # Output the contents of the JSON file for debugging
+              echo "Converted JSON content:"
+              cat "${decrypted_file%.yaml}.json"
 
-                # Debug: Check if the JSON file is created and list files in the directory
-                echo "Listing files in decrypted path:"
-                ls -lah "$decrypted_file_path"
+              # Construct the Vault path
+              filename_without_extension="$(basename $decrypted_file .yaml)"
+              IFS='.' read -r secret_name sub_path <<< "$filename_without_extension"
+              vault_path="secret/data/$secret_name/$sub_path"
+              echo "Uploading to Vault at path: $vault_path"
 
-                # Output the contents of the JSON file for debugging
-                echo "Converted JSON content:"
-                cat "${decrypted_file_path%.yaml}.json"
-
-                # Construct and upload to Vault
-                filename_without_extension="$(basename $file .yaml)"
-                IFS='.' read -r secret_name sub_path <<< "$filename_without_extension"
-                vault_path="secret/data/$secret_name/$sub_path"
-                echo "Uploading to Vault at path: $vault_path"
-                curl -H "X-Vault-Token: $VAULT_TOKEN" \
-                      -H "Content-Type: application/json" \
-                      --request POST \
-                      --data @"${decrypted_file_path%.yaml}.json" \
-                      $VAULT_ADDR/v1/$vault_path
-              else
-                echo "Failed to decrypt file: $file"
-                # Handle the failure case as needed
-              fi
+              # Upload to Vault
+              curl -H "X-Vault-Token: $VAULT_TOKEN" \
+                    -H "Content-Type: application/json" \
+                    --request POST \
+                    --data @"${decrypted_file%.yaml}.json" \
+                    $VAULT_ADDR/v1/$vault_path
             else
-              echo "Publishing secret using sops for file: $file"
-              sops publish -y $file
+              echo "Skipped processing empty or non-existent file: $decrypted_file"
             fi
           done
