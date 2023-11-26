@@ -16,6 +16,7 @@ jobs:
         environment: [sandbox, staging, production]
       fail-fast: false
     runs-on: self-hosted-${{ matrix.environment }}
+    environment: ${{ matrix.environment }} #no longer required
 
     steps:
       - name: Checkout code
@@ -79,26 +80,29 @@ jobs:
           echo "RELEVANT_CHANGES=$relevant_changes" >> $GITHUB_ENV
 
       # Set environment variables based on the matrix environment
-      # - if: env.RELEVANT_CHANGES == 'true'
-      #   name: Set environment variables
-      #   run: |
-      #     VAULT_ADDR="${{ secrets[env.matrix.environment + '_VAULT_ADDR'] }}"
-      #     VAULT_TOKEN="${{ secrets[env.matrix.environment + '_VAULT_TOKEN'] }}"
-      #     echo "VAULT_ADDR=$VAULT_ADDR" >> $GITHUB_ENV
-      #     echo "VAULT_TOKEN=$VAULT_TOKEN" >> $GITHUB_ENV
       - if: env.RELEVANT_CHANGES == 'true'
-        name: Set environment variables
+        name: Set environment variables for ${{ matrix.environment }} environment
         run: |
-          VAULT_ADDR="${{ secrets[format('{0}_VAULT_ADDR', matrix.environment)] }}"
-          VAULT_TOKEN="${{ secrets[format('{0}_VAULT_TOKEN', matrix.environment)] }}"
+          case ${{ matrix.environment }} in
+            sandbox)
+              VAULT_ADDR="${{ secrets.SANDBOX_VAULT_ADDR }}"
+              VAULT_TOKEN="${{ secrets.SANDBOX_VAULT_TOKEN }}"
+              ;;
+            staging)
+              VAULT_ADDR="${{ secrets.STAGING_VAULT_ADDR }}"
+              VAULT_TOKEN="${{ secrets.STAGING_VAULT_TOKEN }}"
+              ;;
+            production)
+              VAULT_ADDR="${{ secrets.PRODUCTION_VAULT_ADDR }}"
+              VAULT_TOKEN="${{ secrets.PRODUCTION_VAULT_TOKEN }}"
+              ;;
+            *)
+              echo "Unsupported environment: ${{ matrix.environment }}"
+              exit 1
+              ;;
+          esac
           echo "VAULT_ADDR=$VAULT_ADDR" >> $GITHUB_ENV
           echo "VAULT_TOKEN=$VAULT_TOKEN" >> $GITHUB_ENV
-
-      # - if: env.RELEVANT_CHANGES == 'true'
-      #   name: Define Decrypted File Path
-      #   run: |
-      #     echo "DECRYPTED_PATH=./decrypted" >> $GITHUB_ENV
-      #     mkdir -p ${{ env.DECRYPTED_PATH }}
 
       - if: env.RELEVANT_CHANGES == 'true'
         name: Define Decrypted File Path
@@ -116,7 +120,7 @@ jobs:
             if [[ $(basename "$file") =~ \..+\.yaml$ ]]; then
               decrypted_file_path="${{ env.DECRYPTED_PATH }}/$(basename $file)"
               echo "Decrypting double-dot file: $file"
-              sops -d $file > $decrypted_file_path
+              sops -d -v $file > $decrypted_file_path
 
               # Convert YAML to JSON
               pip install yq
