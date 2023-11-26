@@ -123,22 +123,24 @@ jobs:
               sops -d -v $file > $decrypted_file_path
               echo "File has been decrypted: $decrypted_file_path"
 
-              # Convert YAML to JSON
+              # Convert YAML to JSON using yq
+              decrypted_json_path="${{ env.DECRYPTED_PATH }}/$(basename $file .yaml).json"
               pip install yq
-              yq -r . "$decrypted_file_path" > decrypted-file.json
+              # yq -r . "$decrypted_file_path" > decrypted-file.json
+              yq -r . "$decrypted_file_path" > "$decrypted_json_path"
+              echo "Converted JSON content:"
               cat decrypted-file.json
 
               # Construct and upload to Vault
-              secret_name="$(basename $file .yaml)"
-              secret_name="${secret_name%%.*}"
-              sub_path="${secret_name#*.}"
-              vault_path="secret/data/$sub_path"
+              filename_without_extension="$(basename $file .yaml)"
+              IFS='.' read -r secret_name sub_path <<< "$filename_without_extension"
+              vault_path="secret/data/$secret_name/$sub_path"
               echo "Uploading to Vault at path: $vault_path"
-              curl -H "X-Vault-Token: $VAULT_TOKEN" \
-                  -H "Content-Type: application/json" \
-                  --request POST \
-                  --data @decrypted-file.json \
-                  $VAULT_ADDR/v1/$vault_path
+              curl  -H "X-Vault-Token: $VAULT_TOKEN" \
+                    -H "Content-Type: application/json" \
+                    --request POST \
+                    --data @"$decrypted_json_path" \
+                    $VAULT_ADDR/v1/$vault_path
             else
               echo "Publishing secret using sops for file: $file"
               sops publish -y $file
