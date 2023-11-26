@@ -117,7 +117,6 @@ creation_rules:
     key_groups:
     #lending
     - age:
-        - 'age1vulxu3tcmzc7uf4nk7m7fsta2mj475q50gwgma2swsrgzds62vcs3zw5l2'
         - 'age1uehup3jrcx5dlar4q8p8vw57d4lwkc2hcdtkmqhcrdp0n6lhvyas05ruf2'
     - pgp:
         - '7EFF431796D90A32826B4C84178F957C4F712CA5'
