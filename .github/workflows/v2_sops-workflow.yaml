@@ -119,17 +119,17 @@ jobs:
           for file in "${modified_files[@]}"; do
             if [[ $(basename "$file") =~ \..+\.yaml$ ]]; then
               decrypted_file_path="${{ env.DECRYPTED_PATH }}/$(basename $file)"
+              decrypted_json_path="${{ env.DECRYPTED_PATH }}/$(basename $file .yaml).json" # Path for the JSON file
               echo "Decrypting double-dot file: $file"
               sops -d -v $file > $decrypted_file_path
-              echo "File has been decrypted: $decrypted_file_path"
 
               # Convert YAML to JSON using yq
-              decrypted_json_path="${{ env.DECRYPTED_PATH }}/$(basename $file .yaml).json"
               pip install yq
-              # yq -r . "$decrypted_file_path" > decrypted-file.json
               yq -r . "$decrypted_file_path" > "$decrypted_json_path"
+
+              # Output the contents of the JSON file for debugging
               echo "Converted JSON content:"
-              cat decrypted-file.json
+              cat "$decrypted_json_path"
 
               # Construct and upload to Vault
               filename_without_extension="$(basename $file .yaml)"
