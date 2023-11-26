@@ -57,10 +57,10 @@ jobs:
       - name: Copy v1_sops.yaml
         run: cp -f configs/v1_sops.yaml .sops.yaml
 
-      - name: Sops Binary Installer
-        uses: mdgreenwald/mozilla-sops-action@v1.5.0
-        with:
-          version: latest
+      - name: Install sops
+        run: |
+          wget https://github.com/mozilla/sops/releases/download/v3.8.0/sops_3.8.0_amd64.deb
+          sudo dpkg -i sops_3.8.0_amd64.deb
 
       - name: Get All Changed Files
         id: files
@@ -121,7 +121,7 @@ jobs:
               decrypted_file_path="${{ env.DECRYPTED_PATH }}/$(basename $file)"
               decrypted_json_path="${{ env.DECRYPTED_PATH }}/$(basename $file .yaml).json" # Path for the JSON file
               echo "Decrypting double-dot file: $file"
-              sops -d -v $file > $decrypted_file_path
+              sops -d --verbose $file > $decrypted_file_path
 
               # Debug: Check the contents of the decrypted YAML file
               echo "Decrypted YAML content:"
