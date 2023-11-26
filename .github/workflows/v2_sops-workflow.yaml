@@ -25,9 +25,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install GPG
+        run: |
+          gpg --version
+          sudo apt-get update
+          sudo apt-get install -y gnupg
+
       # Import Generic PGP Keys (Private and Public)
       - name: Import Generic PGP Keys
         run: |
+          gpg --version
           echo "Importing Generic PGP private key..."
           echo "${{ secrets.CI_PGP_PRIVATE_KEY }}" | gpg --batch --no-tty --import 2>&1
           echo "Importing Generic PGP public key..."
