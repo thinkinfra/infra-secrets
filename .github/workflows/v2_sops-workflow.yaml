@@ -74,11 +74,18 @@ jobs:
           echo "VAULT_ADDR=$VAULT_ADDR" >> $GITHUB_ENV
           echo "VAULT_TOKEN=$VAULT_TOKEN" >> $GITHUB_ENV
 
+      # - if: env.RELEVANT_CHANGES == 'true'
+      #   name: Define Decrypted File Path
+      #   run: |
+      #     echo "DECRYPTED_PATH=./decrypted" >> $GITHUB_ENV
+      #     mkdir -p ${{ env.DECRYPTED_PATH }}
+
       - if: env.RELEVANT_CHANGES == 'true'
         name: Define Decrypted File Path
         run: |
-          echo "DECRYPTED_PATH=./decrypted" >> $GITHUB_ENV
-          mkdir -p ${{ env.DECRYPTED_PATH }}
+          DECRYPTED_PATH="./decrypted"
+          echo "DECRYPTED_PATH=$DECRYPTED_PATH" >> $GITHUB_ENV
+          mkdir -p $DECRYPTED_PATH
 
       - if: env.RELEVANT_CHANGES == 'true'
         name: Process Secret Files
