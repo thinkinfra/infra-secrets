@@ -29,6 +29,23 @@ jobs:
           echo "Importing Generic PGP public key..."
           echo "${{ secrets.CI_PGP_PUBLIC_KEY }}" | gpg --import
 
+      - name: Capture PGP Fingerprint
+        run: |
+          echo "Extracting fingerprint..."
+          FINGERPRINT=$(gpg --list-secret-keys --with-colons | grep '^fpr' | head -n 1 | cut -d':' -f10)
+
+          if [ -z "$FINGERPRINT" ]; then
+            echo "Failed to extract fingerprint"
+            exit 1
+          fi
+
+          echo "Fingerprint extracted: $FINGERPRINT"
+          echo "FINGERPRINT=$FINGERPRINT" >> $GITHUB_ENV
+
+      - name: Use Fingerprint in Another Step
+        run: |
+          echo "The captured fingerprint is $FINGERPRINT"
+
       # Export AGE Key
       - name: Set COMMON_AGE_KEY
         run: echo "COMMON_AGE_KEY=${{ secrets.COMMON_AGE_KEY }}" >> $GITHUB_ENV
