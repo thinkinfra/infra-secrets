@@ -121,7 +121,7 @@ jobs:
               decrypted_file_path="${{ env.DECRYPTED_PATH }}/$(basename $file)"
               decrypted_json_path="${{ env.DECRYPTED_PATH }}/$(basename $file .yaml).json" # Path for the JSON file
               echo "Decrypting double-dot file: $file"
-              sops -d --verbose $file > $decrypted_file_path
+              sops -d --ignore-mac --verbose $file > $decrypted_file_path
 
               # Debug: Check the contents of the decrypted YAML file
               echo "Decrypted YAML content:"
