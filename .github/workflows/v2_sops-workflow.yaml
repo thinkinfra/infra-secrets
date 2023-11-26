@@ -110,7 +110,7 @@ jobs:
           set -e
           IFS=' ' read -r -a modified_files <<< "${{ steps.files.outputs.added_modified }}"
           for file in "${modified_files[@]}"; do
-            if [[ $file =~ .+\.\.yaml$ ]]; then
+            if [[ $(basename "$file") =~ \..+\.yaml$ ]]; then
               decrypted_file_path="${{ env.DECRYPTED_PATH }}/$(basename $file)"
               echo "Decrypting double-dot file: $file"
               sops -d $file > $decrypted_file_path
