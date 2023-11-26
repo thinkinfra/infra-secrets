@@ -9,342 +9,104 @@ on:
   workflow_dispatch:
 
 jobs:
-
-  # pre_job:
-  #   # if: github.event_name == 'pull_request'
-  #   name: Checking duplicate GH Action
-  #   runs-on: self-hosted
-  #   outputs:
-  #     should_skip: ${{ steps.skip_check.outputs.should_skip }}
-  #   steps:
-  #     - id: skip_check
-  #       uses: fkirc/skip-duplicate-actions@v5.3.1
-  #       with:
-  #         skip_after_successful_duplicate: 'true'
-
-  # gitleaks:
-  #   # if: github.event_name == 'pull_request'
-  #   needs: [pre_job]
-  #   name: Scanning secrets via Gitleaks
-  #   runs-on: ubuntu-latest #self-hosted -> https://github.com/gitleaks/gitleaks-action/issues/125
-  #   environment:
-  #     name: system
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         fetch-depth: 0
-  #     - uses: actions/setup-node@v4.0.0
-  #       with:
-  #         node-version: 18
-  #         check-latest: true
-  #     - run: wget -O .gitleaks.toml https://raw.githubusercontent.com/zricethezav/gitleaks/master/config/gitleaks.toml
-  #     - uses: gitleaks/gitleaks-action@v2.3.2
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #         GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE_KEY}} # Only required for Organizations, not personal accounts.
-  #         GITLEAKS_ENABLE_SUMMARY: true
-  #         GITLEAKS_VERSION: latest
-  #     - name: Save success status
-  #       if: ${{ success() }}
-  #       run: echo "success" > status.txt
-  #     - name: Upload status
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: status
-  #         path: status.txt
-
-  # reviewdog:
-  #   # if: github.event_name == 'pull_request'
-  #   needs: [pre_job]
-  #   name: Review Gitleaks
-  #   runs-on: self-hosted
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: reviewdog/action-gitleaks@v1.4.0
-  #       with:
-  #         github_token: ${{ secrets.github_token }}
-  #         # Change reviewdog reporter if you need [github-pr-check,github-check,github-pr-review].
-  #         reporter: github-pr-review
-  #         # Change reporter level if you need.
-  #         # GitHub Status Check won't become failure with warning.
-  #         level: warning
-
   v1_secret_vault:
-    # needs: [pre_job,reviewdog]
     name: "v1 Secret Injection via Sops"
     strategy:
       matrix:
-        environment:
-          - sandbox
-          - staging
-          - production
-    # if: |
-    #       github.event_name == 'pull_request'
-      # github.event.pull_request.merged == true
-
+        environment: [sandbox, staging, production]
+      fail-fast: false
     runs-on: self-hosted-${{ matrix.environment }}
-    timeout-minutes: 5 # Set the runner timeout to 5 minutes
 
-    environment: ${{ matrix.environment }} #no longer required
-
-    # this line will transfer all secrets to the main workflow
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # - name: Download status
-      #   uses: actions/download-artifact@v3
-      #   with:
-      #     name: status
-
-      # - name: Check Gitleaks status
-      #   run: |
-      #     if [[ "$(cat status.txt)" != "success" ]]; then
-      #       echo "Gitleaks check failed. Exiting."
-      #       exit 1s
-      #     fi
-
-      - name: Set environment variables for ${{ matrix.environment }} environment
+      # Import Generic PGP Keys (Private and Public)
+      - name: Import Generic PGP Keys
         run: |
-          case ${{ matrix.environment }} in
-            sandbox)
-              VAULT_ADDR="${{ secrets.SANDBOX_VAULT_ADDR }}"
-              VAULT_TOKEN="${{ secrets.SANDBOX_VAULT_TOKEN }}"
-              ;;
-            staging)
-              VAULT_ADDR="${{ secrets.STAGING_VAULT_ADDR }}"
-              VAULT_TOKEN="${{ secrets.STAGING_VAULT_TOKEN }}"
-              ;;
-            production)
-              VAULT_ADDR="${{ secrets.PRODUCTION_VAULT_ADDR }}"
-              VAULT_TOKEN="${{ secrets.PRODUCTION_VAULT_TOKEN }}"
-              ;;
-            *)
-              echo "Unsupported environment: ${{ matrix.environment }}"
-              exit 1
-              ;;
-          esac
-          echo "VAULT_ADDR=$VAULT_ADDR" >> $GITHUB_ENV
-          echo "VAULT_TOKEN=$VAULT_TOKEN" >> $GITHUB_ENV
+          echo "Importing Generic PGP private key..."
+          echo "${{ secrets.CI_PGP_PRIVATE_KEY }}" | gpg --batch --no-tty --import
+          echo "Importing Generic PGP public key..."
+          echo "${{ secrets.CI_PGP_PUBLIC_KEY }}" | gpg --import
 
-      # - name: Use the environment variables for ${{ matrix.environment }} environment
-      #   run: |
-      #     # Access the environment-specific environment variables
-      #     echo "Value of VAULT_ADDR: $VAULT_ADDR"
-      #     echo "Value of VAULT_TOKEN: $VAULT_TOKEN"
-
-      - name: Check out repository code
-        uses: actions/checkout@v4
+      # Export AGE Key
+      - name: Set COMMON_AGE_KEY
+        run: echo "COMMON_AGE_KEY=${{ secrets.COMMON_AGE_KEY }}" >> $GITHUB_ENV
 
       - name: Copy v1_sops.yaml
         run: cp -f configs/v1_sops.yaml .sops.yaml
+
+      - name: Sops Binary Installer
+        uses: mdgreenwald/mozilla-sops-action@v1.5.0
+        with:
+          version: '3.7.1'
 
       - name: Get All Changed Files
         id: files
         uses: jitterbit/get-changed-files@v1
 
-      - name: Sops Binary Installer
-        uses: mdgreenwald/mozilla-sops-action@v1.5.0
-        with:
-          version: latest # default is latest stable
+      - name: Check for Relevant Changes
+        id: check_changes
+        run: |
+          IFS=' ' read -r -a modified_files <<< "${{ steps.files.outputs.added_modified }}"
+          relevant_changes="false"
+          for file in "${modified_files[@]}"; do
+            if [[ $file == secrets/${{ matrix.environment }}/lending/* ]]; then
+              relevant_changes="true"
+              break
+            fi
+          done
+          echo "RELEVANT_CHANGES=$relevant_changes" >> $GITHUB_ENV
 
-      # - name: Install Vault CLI
+      # Set environment variables based on the matrix environment
+      # - if: env.RELEVANT_CHANGES == 'true'
+      #   name: Set environment variables
       #   run: |
-      #     curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
-      #     sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
-      #     sudo apt-get update && sudo apt-get install vault
+      #     VAULT_ADDR="${{ secrets[env.matrix.environment + '_VAULT_ADDR'] }}"
+      #     VAULT_TOKEN="${{ secrets[env.matrix.environment + '_VAULT_TOKEN'] }}"
+      #     echo "VAULT_ADDR=$VAULT_ADDR" >> $GITHUB_ENV
+      #     echo "VAULT_TOKEN=$VAULT_TOKEN" >> $GITHUB_ENV
+      - if: env.RELEVANT_CHANGES == 'true'
+        name: Set environment variables
+        run: |
+          VAULT_ADDR="${{ secrets[format('{0}_VAULT_ADDR', matrix.environment)] }}"
+          VAULT_TOKEN="${{ secrets[format('{0}_VAULT_TOKEN', matrix.environment)] }}"
+          echo "VAULT_ADDR=$VAULT_ADDR" >> $GITHUB_ENV
+          echo "VAULT_TOKEN=$VAULT_TOKEN" >> $GITHUB_ENV
 
-      # - name: Log in to Vault
-      #   run: |
-      #     vault login -no-print -address=$VAULT_ADDR token=$VAULT_TOKEN
+      - if: env.RELEVANT_CHANGES == 'true'
+        name: Define Decrypted File Path
+        run: |
+          echo "DECRYPTED_PATH=./decrypted" >> $GITHUB_ENV
+          mkdir -p ${{ env.DECRYPTED_PATH }}
 
-      # OLD
-      # - name: Publish secrets for ${{ matrix.environment }} environment
-      #   timeout-minutes: 5  # Set the step-level timeout to 5 minutes
-      #   run: |
-      #     set -e
-      #     for secret_file in ${{ steps.files.outputs.added_modified }}; do
-      #       echo "Processing secret file: $secret_file"
-      #       if [[ $secret_file =~ "secrets/${{ matrix.environment }}" ]]; then
-      #           if [[ $secret_file != *"CODEOWNERS"* ]]; then
-      #             echo "Publishing secrets for ${{ matrix.environment }}"
-      #             sops publish -y "${secret_file}"
-      #           else
-      #             echo "Skipping CODEOWNERS file: $secret_file"
-      #           fi
-      #       fi
-      #     done
-
-      # NEW
-      # - name: Publish secrets for ${{ matrix.environment }} environment
-      #   timeout-minutes: 5  # Set the step-level timeout to 5 minutes
-      #   run: |
-      #     set -e
-      #     for secret_file in ${{ steps.files.outputs.added_modified }}; do
-      #       echo "Processing secret file: $secret_file"
-
-      #       # Check if the file has a pattern with two periods before .yaml
-      #       if [[ $secret_file =~ \..*\.yaml$ ]]; then
-      #         echo "Processing double-dot file: $secret_file"
-      #         # Custom logic for processing double-dot files
-      #         # Extract the base path without the extension
-      #         base_path=$(echo $secret_file | sed 's/\.yaml$//')
-      #         # Replace '/' with '.' and append the file name without extension
-      #         modified_path=$(echo $base_path | sed 's/\//./g')
-      #         # Construct the Vault path for double-dot files
-      #         full_vault_path="secret/data/$modified_path"
-      #         # Decrypt with sops and upload to Vault
-      #         sops --config configs/v1_sops.yaml -d $secret_file | vault kv put secret/$full_vault_path -
-
-      #       elif [[ $secret_file =~ "secrets/${{ matrix.environment }}" && $secret_file != *"CODEOWNERS"* ]]; then
-      #         echo "Publishing secrets for ${{ matrix.environment }}"
-      #         sops publish -y "${secret_file}"
-
-      #       else
-      #         echo "Skipping file: $secret_file"
-      #       fi
-      #     done
-
-      # - name: Process Files for Environment ${{ matrix.environment }}
-      - name: Process Files for Environment
+      - if: env.RELEVANT_CHANGES == 'true'
+        name: Process Secret Files
         run: |
           set -e
-          for secret_file in ${{ steps.files.outputs.added_modified }}; do
-            echo "Processing secret file in ${{ matrix.environment }}: $secret_file"
-
-            # Check if the file is a double-dot file
-            if [[ $secret_file =~ \..*\.yaml$ ]]; then
-              echo "Processing double-dot file: $secret_file"
-
-              # Decrypt with sops
-              sops -d $secret_file > decrypted-file.yaml
+          IFS=' ' read -r -a modified_files <<< "${{ steps.files.outputs.added_modified }}"
+          for file in "${modified_files[@]}"; do
+            if [[ $file =~ ^secrets/${{ matrix.environment }}/lending/.+\.\.yaml$ ]]; then
+              decrypted_file_path="${{ env.DECRYPTED_PATH }}/$(basename $file)"
+              echo "Decrypting double-dot file: $file"
+              sops -d $file > $decrypted_file_path
 
               # Convert YAML to JSON
-              wget https://github.com/mikefarah/yq/releases/download/v4.13.3/yq_linux_amd64 -O yq && chmod +x yq
-              sudo mv yq /usr/local/bin/
-              yq eval -o=json decrypted-file.yaml > decrypted-file.json
+              pip install yq
+              yq eval -o=json "$decrypted_file_path" > decrypted-file.json
 
-              # Extract secret_name and sub-path from file name
-              filename=$(basename "$secret_file")
+              # Construct and upload to Vault
               secret_name="${filename%%.*}"
               sub_path="${filename%.*}"
               sub_path="${sub_path#*.}"
-
-              # Construct the Vault path for double-dot files
               vault_path="secret/data/$secret_name/$sub_path"
-
-              # Upload to Vault using curl
               curl -H "X-Vault-Token: $VAULT_TOKEN" \
                   -H "Content-Type: application/json" \
                   --request POST \
                   --data @decrypted-file.json \
                   $VAULT_ADDR/v1/$vault_path
-
-            elif [[ $secret_file =~ "secrets/${{ matrix.environment }}" && $secret_file != *"CODEOWNERS"* ]]; then
-              echo "Publishing secret using sops: $secret_file"
-              # Here you can adjust the sops publish command to fit your use case
-              sops publish -y "$secret_file"
             else
-              echo "Skipping file: $secret_file"
+              echo "Publishing secret using sops for file: $file"
+              sops publish -y "secrets/${{ matrix.environment }}/lending/$file"
             fi
           done
-
-
-  # v2_secret_vault:
-  #   needs: [pre_job,reviewdog]
-  #   name: "v2 Secret Injection via Sops"
-  #   strategy:
-  #     matrix:
-  #       environment:
-  #         - sandbox
-  #         - staging
-  #         - production
-  #   if: |
-  #         github.event.pull_request.merged == true
-  #       # needs.pre_job.outputs.should_skip != true
-  #       # github.event_name == 'pull_request'
-  #   runs-on: self-hosted-${{ matrix.environment }}
-  #   timeout-minutes: 5 # Set the runner timeout to 5 minutes
-
-  #   environment: ${{ matrix.environment }} #no longer required
-
-  #   # this line will transfer all secrets to the main workflow
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
-
-  #     - name: Download status
-  #       uses: actions/download-artifact@v3
-  #       with:
-  #         name: status
-
-  #     - name: Check Gitleaks status
-  #       run: |
-  #         if [[ "$(cat status.txt)" != "success" ]]; then
-  #           echo "Gitleaks check failed. Exiting."
-  #           exit 1s
-  #         fi
-
-  #     - name: Set environment variables for ${{ matrix.environment }} environment
-  #       run: |
-  #         case ${{ matrix.environment }} in
-  #           sandbox)
-  #             VAULT_ADDR="${{ secrets.SANDBOX_VAULT_ADDR }}"
-  #             VAULT_TOKEN="${{ secrets.SANDBOX_VAULT_TOKEN }}"
-  #             ;;
-  #           staging)
-  #             VAULT_ADDR="${{ secrets.STAGING_VAULT_ADDR }}"
-  #             VAULT_TOKEN="${{ secrets.STAGING_VAULT_TOKEN }}"
-  #             ;;
-  #           production)
-  #             VAULT_ADDR="${{ secrets.PRODUCTION_VAULT_ADDR }}"
-  #             VAULT_TOKEN="${{ secrets.PRODUCTION_VAULT_TOKEN }}"
-  #             ;;
-  #           *)
-  #             echo "Unsupported environment: ${{ matrix.environment }}"
-  #             exit 1
-  #             ;;
-  #         esac
-  #         echo "VAULT_ADDR=$VAULT_ADDR" >> $GITHUB_ENV
-  #         echo "VAULT_TOKEN=$VAULT_TOKEN" >> $GITHUB_ENV
-
-  #     - name: Use the environment variables for ${{ matrix.environment }} environment
-  #       run: |
-  #         # Access the environment-specific environment variables
-  #         echo "Value of VAULT_ADDR: $VAULT_ADDR"
-  #         echo "Value of VAULT_TOKEN: $VAULT_TOKEN"
-
-  #     - name: Debugging
-  #       run: |
-  #           echo "SANDBOX_VAULT_ADDR: ${{ secrets.SANDBOX_VAULT_ADDR }}"
-  #           echo "SANDBOX_VAULT_TOKEN: ${{ secrets.SANDBOX_VAULT_TOKEN }}"
-  #     - name: Check out repository code
-  #       uses: actions/checkout@v4
-
-  #     - name: Copy v2_sops.yaml
-  #       run: cp -f configs/v2_sops.yaml .sops.yaml
-
-  #     - name: Get All Changed Files
-  #       id: files
-  #       uses: jitterbit/get-changed-files@v1
-
-  #     - name: Sops Binary Installer
-  #       uses: mdgreenwald/mozilla-sops-action@v1.5.0
-  #       with:
-  #         version: latest # default is latest stable
-
-  #     - name: Publish secrets for ${{ matrix.environment }} environment
-  #       timeout-minutes: 5  # Set the step-level timeout to 5 minutes
-  #       run: |
-  #         set -e
-  #         for secret_file in ${{ steps.files.outputs.added_modified }}; do
-  #           echo "Processing secret file: $secret_file"
-  #           if [[ $secret_file =~ "secrets/${{ matrix.environment }}" ]]; then
-  #               if [[ $secret_file != *"CODEOWNERS"* ]]; then
-  #                 echo "Publishing secrets for ${{ matrix.environment }}"
-  #                 sops publish -y "${secret_file}"
-  #               else
-  #                 echo "Skipping CODEOWNERS file: $secret_file"
-  #               fi
-  #           fi
-  #         done
