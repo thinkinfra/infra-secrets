@@ -121,10 +121,11 @@ jobs:
               decrypted_file_path="${{ env.DECRYPTED_PATH }}/$(basename $file)"
               echo "Decrypting double-dot file: $file"
               sops -d -v $file > $decrypted_file_path
+              echo "File has been decrypted: $decrypted_file_path"
 
               # Convert YAML to JSON
               pip install yq
-              yq eval -o=json "$decrypted_file_path" > decrypted-file.json
+              yq -r . "$decrypted_file_path" > decrypted-file.json
 
               # Construct and upload to Vault
               secret_name="$(basename $file .yaml)"
