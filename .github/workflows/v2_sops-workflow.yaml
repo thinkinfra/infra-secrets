@@ -19,6 +19,9 @@ jobs:
     environment: ${{ matrix.environment }} #no longer required
 
     steps:
+      - name: Clean up working directory
+        run: rm -rf ./*
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -26,9 +29,9 @@ jobs:
       - name: Import Generic PGP Keys
         run: |
           echo "Importing Generic PGP private key..."
-          echo "${{ secrets.CI_PGP_PRIVATE_KEY }}" | gpg --batch --no-tty --import
+          echo "${{ secrets.CI_PGP_PRIVATE_KEY }}" | gpg --batch --no-tty --import 2>&1
           echo "Importing Generic PGP public key..."
-          echo "${{ secrets.CI_PGP_PUBLIC_KEY }}" | gpg --import
+          echo "${{ secrets.CI_PGP_PUBLIC_KEY }}" | gpg --import 2>&1
 
       - name: Capture PGP Fingerprint
         run: |
@@ -57,14 +60,14 @@ jobs:
       - name: Copy v1_sops.yaml
         run: cp -f configs/v1_sops.yaml .sops.yaml
 
-      # - name: Install sops
-      #   run: |
-      #     wget https://github.com/mozilla/sops/releases/download/v3.8.0/sops_3.8.0_amd64.deb
-      #     sudo dpkg -i sops_3.8.0_amd64.deb
-      - name: Sops Binary Installer
-        uses: mdgreenwald/mozilla-sops-action@v1.5.0
-        with:
-          version: latest # default is latest stable
+      - name: Install sops
+        run: |
+          wget https://github.com/mozilla/sops/releases/download/v3.8.0/sops_3.8.0_amd64.deb
+          sudo dpkg -i sops_3.8.0_amd64.deb
+      # - name: Sops Binary Installer
+      #   uses: mdgreenwald/mozilla-sops-action@v1.5.0
+      #   with:
+      #     version: latest # default is latest stable
 
       - name: Verify sops installation
         run: sops --version
