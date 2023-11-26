@@ -173,20 +173,10 @@ creation_rules:
           account: sops-sa
           region: us-east-1
           type: kms-master-key
-      - arn: 'arn:aws:kms:us-east-1:644712362974:key/978a683a-4864-4537-88fb-2dc8ea4f8080'
-        context:
-          account: vault-sa
-          region: us-east-1
-          type: kms-master-key
     - kms:
       - arn: 'arn:aws:kms:us-west-2:644712362974:key/9d994675-3143-4b2a-a920-459c87207998'
         context:
           account: sops-sa
-          region: us-west-2
-          type: kms-master-key
-      - arn: 'arn:aws:kms:us-west-2:644712362974:key/5dcee9a6-72f1-4a7f-bdfe-f7be9ad02b72'
-        context:
-          account: vault-sa
           region: us-west-2
           type: kms-master-key
 
