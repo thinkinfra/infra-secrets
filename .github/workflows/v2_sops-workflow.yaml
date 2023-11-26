@@ -87,33 +87,67 @@ jobs:
           echo "DECRYPTED_PATH=$DECRYPTED_PATH" >> $GITHUB_ENV
           mkdir -p $DECRYPTED_PATH
 
+      # - if: env.RELEVANT_CHANGES == 'true'
+      #   name: Process Secret Files
+      #   run: |
+      #     set -e
+      #     IFS=' ' read -r -a modified_files <<< "${{ steps.files.outputs.added_modified }}"
+      #     for file in "${modified_files[@]}"; do
+      #       if [[ $file =~ ^secrets/${{ matrix.environment }}/lending/.+\.\.yaml$ ]]; then
+      #         decrypted_file_path="${{ env.DECRYPTED_PATH }}/$(basename $file)"
+      #         echo "Decrypting double-dot file: $file"
+      #         sops -d $file > $decrypted_file_path
+
+      #         # Convert YAML to JSON
+      #         pip install yq
+      #         yq eval -o=json "$decrypted_file_path" > decrypted-file.json
+
+      #         # Construct and upload to Vault
+      #         secret_name="${filename%%.*}"
+      #         sub_path="${filename%.*}"
+      #         sub_path="${sub_path#*.}"
+      #         vault_path="secret/data/$secret_name/$sub_path"
+      #         curl -H "X-Vault-Token: $VAULT_TOKEN" \
+      #             -H "Content-Type: application/json" \
+      #             --request POST \
+      #             --data @decrypted-file.json \
+      #             $VAULT_ADDR/v1/$vault_path
+      #       else
+      #         echo "Publishing secret using sops for file: $file"
+      #         sops publish -y "secrets/${{ matrix.environment }}/lending/$file"
+      #       fi
+      #     done
+
       - if: env.RELEVANT_CHANGES == 'true'
         name: Process Secret Files
         run: |
           set -e
           IFS=' ' read -r -a modified_files <<< "${{ steps.files.outputs.added_modified }}"
           for file in "${modified_files[@]}"; do
-            if [[ $file =~ ^secrets/${{ matrix.environment }}/lending/.+\.\.yaml$ ]]; then
-              decrypted_file_path="${{ env.DECRYPTED_PATH }}/$(basename $file)"
-              echo "Decrypting double-dot file: $file"
-              sops -d $file > $decrypted_file_path
+            # Adjusted file path to ensure no duplication
+            file_path="secrets/${{ matrix.environment }}/lending/$file"
+
+            if [[ $file_path =~ .+\.\.yaml$ ]]; then
+              decrypted_file_path="${{ env.DECRYPTED_PATH }}/$(basename $file_path)"
+              echo "Decrypting double-dot file: $file_path"
+              sops -d $file_path > $decrypted_file_path
 
               # Convert YAML to JSON
               pip install yq
               yq eval -o=json "$decrypted_file_path" > decrypted-file.json
 
               # Construct and upload to Vault
-              secret_name="${filename%%.*}"
-              sub_path="${filename%.*}"
-              sub_path="${sub_path#*.}"
-              vault_path="secret/data/$secret_name/$sub_path"
+              secret_name="$(basename $file_path .yaml)"
+              secret_name="${secret_name%%.*}"
+              sub_path="${secret_name#*.}"
+              vault_path="secret/data/$sub_path"
               curl -H "X-Vault-Token: $VAULT_TOKEN" \
                   -H "Content-Type: application/json" \
                   --request POST \
                   --data @decrypted-file.json \
                   $VAULT_ADDR/v1/$vault_path
             else
-              echo "Publishing secret using sops for file: $file"
-              sops publish -y "secrets/${{ matrix.environment }}/lending/$file"
+              echo "Publishing secret using sops for file: $file_path"
+              sops publish -y $file_path
             fi
           done
