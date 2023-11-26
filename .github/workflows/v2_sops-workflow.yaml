@@ -126,12 +126,14 @@ jobs:
               # Convert YAML to JSON
               pip install yq
               yq -r . "$decrypted_file_path" > decrypted-file.json
+              cat decrypted-file.json
 
               # Construct and upload to Vault
               secret_name="$(basename $file .yaml)"
               secret_name="${secret_name%%.*}"
               sub_path="${secret_name#*.}"
               vault_path="secret/data/$sub_path"
+              echo "Uploading to Vault at path: $vault_path"
               curl -H "X-Vault-Token: $VAULT_TOKEN" \
                   -H "Content-Type: application/json" \
                   --request POST \
