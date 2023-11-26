@@ -123,20 +123,29 @@ jobs:
               echo "Decrypting double-dot file: $file"
               sops -d -v $file > $decrypted_file_path
 
+              # Debug: Check the contents of the decrypted YAML file
+              echo "Decrypted YAML content:"
+              cat "$decrypted_file_path"
+
               # Convert YAML to JSON using yq
               pip install yq
-              yq -r . "$decrypted_file_path" > "$decrypted_json_path"
+              yq -r . "$decrypted_file_path" > "$decrypted_json_path" || echo "yq conversion failed"
 
-              # Output the contents of the JSON file for debugging
+              # Debug: Check if the JSON file is created and list files in the directory
+              echo "Listing files in decrypted path:"
+              ls -lah "${{ env.DECRYPTED_PATH }}/"
+
+              # Debug: Output the contents of the JSON file
               echo "Converted JSON content:"
               cat "$decrypted_json_path"
+
 
               # Construct and upload to Vault
               filename_without_extension="$(basename $file .yaml)"
               IFS='.' read -r secret_name sub_path <<< "$filename_without_extension"
               vault_path="secret/data/$secret_name/$sub_path"
               echo "Uploading to Vault at path: $vault_path"
-              curl  -H "X-Vault-Token: $VAULT_TOKEN" \
+              curl -H "X-Vault-Token: $VAULT_TOKEN" \
                     -H "Content-Type: application/json" \
                     --request POST \
                     --data @"$decrypted_json_path" \
