@@ -48,7 +48,10 @@ jobs:
 
       # Export AGE Key
       - name: Set COMMON_AGE_KEY
-        run: echo "SOPS_AGE_KEY_FILE=${{ secrets.COMMON_AGE_KEY }}" >> $GITHUB_ENV
+        run: |
+          AGE_KEY_FILE="sops-age-key.txt"
+          echo "${{ secrets.COMMON_AGE_KEY }}" > "$AGE_KEY_FILE"
+          echo "SOPS_AGE_KEY_FILE=$AGE_KEY_FILE" >> $GITHUB_ENV
 
       - name: Copy v1_sops.yaml
         run: cp -f configs/v1_sops.yaml .sops.yaml
