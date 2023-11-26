@@ -57,10 +57,23 @@ jobs:
       - name: Copy v1_sops.yaml
         run: cp -f configs/v1_sops.yaml .sops.yaml
 
+      # - name: Install sops
+      #   run: |
+      #     wget https://github.com/mozilla/sops/releases/download/v3.8.0/sops_3.8.0_amd64.deb
+      #     sudo dpkg -i sops_3.8.0_amd64.deb
       - name: Install sops
         run: |
-          wget https://github.com/mozilla/sops/releases/download/v3.8.0/sops_3.8.0_amd64.deb
-          sudo dpkg -i sops_3.8.0_amd64.deb
+          # Install dependencies
+          sudo apt-get update
+          sudo apt-get install -y gnupg2
+
+          # Install sops
+          curl -L -o sops https://github.com/mozilla/sops/releases/download/v3.8.0/sops-v3.8.0.linux
+          sudo mv sops /usr/local/bin/sops
+          sudo chmod +x /usr/local/bin/sops
+
+      - name: Verify sops installation
+        run: sops --version
 
       - name: Get All Changed Files
         id: files
