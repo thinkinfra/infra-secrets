@@ -104,12 +104,19 @@ jobs:
           echo "VAULT_ADDR=$VAULT_ADDR" >> $GITHUB_ENV
           echo "VAULT_TOKEN=$VAULT_TOKEN" >> $GITHUB_ENV
 
-      - if: env.RELEVANT_CHANGES == 'true'
-        name: Define Decrypted File Path
-        run: |
-          DECRYPTED_PATH="./decrypted"
-          echo "DECRYPTED_PATH=$DECRYPTED_PATH" >> $GITHUB_ENV
-          mkdir -p $DECRYPTED_PATH
+      # - if: env.RELEVANT_CHANGES == 'true'
+      #   name: Define Secret File Path
+      #   run: |
+      #     SECRET_FILE_PATH="secrets/${{ matrix.environment }}/lending"
+      #     echo "SECRET_FILE_PATH=$SECRET_FILE_PATH" >> $GITHUB_ENV
+
+      # - if: env.RELEVANT_CHANGES == 'true'
+      #   name: Define Temporary Decrypted File Path
+      #   run: |
+      #     DECRYPTED_FILE_PATH="$(dirname ${{ env.SECRET_FILE_PATH }})/temp_decrypted_file.yaml"
+      #     echo "Creating temporary decrypted file directory: $TEMP_DECRYPTED_PATH"
+      #     mkdir -p $DECRYPTED_FILE_PATH
+      #     echo "DECRYPTED_FILE_PATH=$DECRYPTED_FILE_PATH" >> $GITHUB_ENV
 
       - if: env.RELEVANT_CHANGES == 'true'
         name: Process Secret Files
@@ -118,12 +125,15 @@ jobs:
           IFS=' ' read -r -a modified_files <<< "${{ steps.files.outputs.added_modified }}"
           for file in "${modified_files[@]}"; do
             if [[ $(basename "$file") =~ \..+\.yaml$ ]]; then
-              decrypted_file_path="${{ env.DECRYPTED_PATH }}/$(basename $file)"
-              decrypted_json_path="${{ env.DECRYPTED_PATH }}/$(basename $file .yaml).json" # Path for the JSON file
+              # Prepare the directory and file for decryption
+              decrypted_directory="secrets/${{ matrix.environment }}/lending/decrypted"
+              mkdir -p "$decrypted_directory"
+              decrypted_file_path="$decrypted_directory/$(basename $file)"
+              touch "$decrypted_file_path"
 
               # Attempt decryption but ignore errors
               echo "Decrypting double-dot file: $file"
-              sops -d --verbose $file > $decrypted_file_path || echo "Decryption error, might continue if threshold is met"
+              sops --verbose -d $file > $decrypted_file_path || echo "Decryption error, might continue if threshold is met"
 
               # Debug: Check the contents of the decrypted YAML file
               echo "Decrypted YAML content:"
@@ -135,15 +145,15 @@ jobs:
 
                 # Convert YAML to JSON using yq
                 pip install yq
-                yq -r . "$decrypted_file_path" > "$decrypted_json_path" || echo "yq conversion failed"
+                yq -r . "$decrypted_file_path" > "${decrypted_file_path%.yaml}.json" || echo "yq conversion failed"
 
                 # Debug: Check if the JSON file is created and list files in the directory
                 echo "Listing files in decrypted path:"
-                ls -lah "${{ env.DECRYPTED_PATH }}/"
+                ls -lah "$decrypted_file_path"
 
-                # Debug: Output the contents of the JSON file
+                # Output the contents of the JSON file for debugging
                 echo "Converted JSON content:"
-                cat "$decrypted_json_path"
+                cat "${decrypted_file_path%.yaml}.json"
 
                 # Construct and upload to Vault
                 filename_without_extension="$(basename $file .yaml)"
@@ -153,7 +163,7 @@ jobs:
                 curl -H "X-Vault-Token: $VAULT_TOKEN" \
                       -H "Content-Type: application/json" \
                       --request POST \
-                      --data @"$decrypted_json_path" \
+                      --data @"${decrypted_file_path%.yaml}.json" \
                       $VAULT_ADDR/v1/$vault_path
               else
                 echo "Failed to decrypt file: $file"
