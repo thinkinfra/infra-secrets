@@ -237,7 +237,7 @@ jobs:
             else
               # File not decrypted, use sops publish
               echo "Publishing secret using sops for file: $file"
-              sops publish -y "secrets/${{ matrix.environment }}/$folder_name/$file"
+              sops publish -y "secrets/${{ matrix.environment }}/$file"
             fi
           done
 
