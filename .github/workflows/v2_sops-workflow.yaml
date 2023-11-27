@@ -16,7 +16,6 @@ jobs:
         environment: [sandbox, staging, production]
       fail-fast: false
     runs-on: self-hosted-${{ matrix.environment }}
-    # runs-on: ubuntu-latest
     environment: ${{ matrix.environment }} #no longer required
 
     steps:
@@ -174,39 +173,57 @@ jobs:
           IFS=' ' read -r -a modified_files <<< "${{ steps.files.outputs.added_modified }}"
           for file in "${modified_files[@]}"; do
             if [[ $(basename "$file") =~ \..+\.yaml$ ]]; then
-              decrypted_directory="secrets/${{ matrix.environment }}/lending/decrypted"
+              # Extract the folder name from the file path
+              path_components=(${file//\// })
+              folder_name=${path_components[2]}  # Adjust based on your directory structure
+
+              decrypted_directory="secrets/${{ matrix.environment }}/$folder_name/decrypted"
               mkdir -p "$decrypted_directory"
               decrypted_file_path="$decrypted_directory/$(basename $file)"
-              touch "$decrypted_file_path"
+              flag_file_path="$decrypted_directory/$(basename $file).decrypted"
 
               echo "Decrypting double-dot file: $file"
-              # sops --verbose -d $file > $decrypted_file_path || echo "Decryption error, might continue if threshold is met"
-              sops --config configs/v1_sops.yaml --decrypt $file > $decrypted_file_path
+              if sops --config configs/v1_sops.yaml --decrypt $file > $decrypted_file_path; then
+                # Create a flag file to indicate successful decryption
+                touch "$flag_file_path"
+              fi
             fi
           done
           # Debug: Check the contents of the decrypted YAML file
-          echo "Decrypted YAML content:"
-          cat "$decrypted_file_path"
+          for decrypted_file in "$decrypted_directory"/*.yaml; do
+            echo "Decrypted YAML content for $decrypted_file:"
+            cat "$decrypted_file"
+          done
 
       - if: env.RELEVANT_CHANGES == 'true'
-        name: Process Decrypted Secret Files
+        name: Process Secret Files
         run: |
           set -e
-          decrypted_directory="secrets/${{ matrix.environment }}/lending/decrypted"
-          for decrypted_file in "$decrypted_directory"/*.yaml; do
-            if [ -s "$decrypted_file" ]; then
-              echo "Processing decrypted file: $decrypted_file"
+          IFS=' ' read -r -a modified_files <<< "${{ steps.files.outputs.added_modified }}"
+          for file in "${modified_files[@]}"; do
+            # Extract the folder name from the file path
+            path_components=(${file//\// })
+            folder_name=${path_components[2]}  # Adjust based on your directory structure
+
+            decrypted_directory="secrets/${{ matrix.environment }}/$folder_name/decrypted"  # Update as needed
+            decrypted_file_path="$decrypted_directory/$(basename $file)"
+            flag_file_path="$decrypted_directory/$(basename $file).decrypted"
+
+            if [[ -f "$flag_file_path" ]]; then
+              # Process decrypted file
+              # uploading to Vault via curl
+              echo "Processing decrypted file: $decrypted_file_path"
 
               # Convert YAML to JSON using yq
               pip install yq
-              yq -r . "$decrypted_file" > "${decrypted_file%.yaml}.json"
+              yq -r . "$decrypted_file_path" > "${decrypted_file_path%.yaml}.json"
 
               # Output the contents of the JSON file for debugging
               echo "Converted JSON content:"
-              cat "${decrypted_file%.yaml}.json"
+              cat "${decrypted_file_path%.yaml}.json"
 
               # Construct the Vault path
-              filename_without_extension="$(basename $decrypted_file .yaml)"
+              filename_without_extension="$(basename $decrypted_file_path .yaml)"
               IFS='.' read -r secret_name sub_path <<< "$filename_without_extension"
               vault_path="secret/$secret_name/$sub_path"
               echo "Uploading to Vault at path: $vault_path"
@@ -215,9 +232,80 @@ jobs:
               curl -H "X-Vault-Token: $VAULT_TOKEN" \
                     -H "Content-Type: application/json" \
                     --request POST \
-                    --data @"${decrypted_file%.yaml}.json" \
+                    --data @"${decrypted_file_path%.yaml}.json" \
                     $VAULT_ADDR/v1/$vault_path
             else
-              echo "Skipped processing empty or non-existent file: $decrypted_file"
+              # File not decrypted, use sops publish
+              echo "Publishing secret using sops for file: $file"
+              sops publish -y "secrets/${{ matrix.environment }}/$folder_name/$file"
             fi
           done
+
+      # - if: env.RELEVANT_CHANGES == 'true'
+      #   name: Decrypt Double-Dotted Secret Files
+      #   run: |
+      #     set -e
+      #     IFS=' ' read -r -a modified_files <<< "${{ steps.files.outputs.added_modified }}"
+      #     for file in "${modified_files[@]}"; do
+      #       if [[ $(basename "$file") =~ \..+\.yaml$ ]]; then
+      #         # Extract the folder name from the file path
+      #         path_components=(${file//\// })
+      #         folder_name=${path_components[2]}  # Assuming the structure is secrets/<environment>/<folder_name>/...
+
+      #         decrypted_directory="secrets/${{ matrix.environment }}/$folder_name/decrypted"
+      #         mkdir -p "$decrypted_directory"
+      #         decrypted_file_path="$decrypted_directory/$(basename $file)"
+      #         touch "$decrypted_file_path"
+
+      #         echo "Decrypting double-dot file: $file"
+      #         # sops --verbose -d $file > $decrypted_file_path || echo "Decryption error, might continue if threshold is met"
+      #         sops --config configs/v1_sops.yaml --decrypt $file > $decrypted_file_path
+      #       fi
+      #     done
+
+      #     # Debug: Check the contents of the decrypted YAML file
+      #     for decrypted_file in "$decrypted_directory"/*.yaml; do
+      #       echo "Decrypted YAML content for $decrypted_file:"
+      #       cat "$decrypted_file"
+      #     done
+
+      # - if: env.RELEVANT_CHANGES == 'true'
+      #   name: Process Decrypted Secret Files
+      #   run: |
+      #     set -e
+      #     IFS=' ' read -r -a modified_files <<< "${{ steps.files.outputs.added_modified }}"
+      #     for file in "${modified_files[@]}"; do
+      #       decrypted_file_path="${{ env.DECRYPTED_PATH }}/$(basename $file)"
+
+      #     decrypted_directory="secrets/${{ matrix.environment }}/lending/decrypted"
+      #     for decrypted_file in "$decrypted_directory"/*.yaml; do
+      #       if [ -s "$decrypted_file" ]; then
+      #         echo "Processing decrypted file: $decrypted_file"
+
+      #         # Convert YAML to JSON using yq
+      #         pip install yq
+      #         yq -r . "$decrypted_file" > "${decrypted_file%.yaml}.json"
+
+      #         # Output the contents of the JSON file for debugging
+      #         echo "Converted JSON content:"
+      #         cat "${decrypted_file%.yaml}.json"
+
+      #         # Construct the Vault path
+      #         filename_without_extension="$(basename $decrypted_file .yaml)"
+      #         IFS='.' read -r secret_name sub_path <<< "$filename_without_extension"
+      #         vault_path="secret/$secret_name/$sub_path"
+      #         echo "Uploading to Vault at path: $vault_path"
+
+      #         # Upload to Vault
+      #         curl -H "X-Vault-Token: $VAULT_TOKEN" \
+      #               -H "Content-Type: application/json" \
+      #               --request POST \
+      #               --data @"${decrypted_file%.yaml}.json" \
+      #               $VAULT_ADDR/v1/$vault_path
+      #       else
+      #         # echo "Skipped processing empty or non-existent file: $decrypted_file"
+      #         echo "File not decrypted or not a double-dot file. Publishing using sops for file: $file"
+      #         sops publish -y "secrets/${{ matrix.environment }}/lending/$file"
+      #       fi
+      #     done
+
