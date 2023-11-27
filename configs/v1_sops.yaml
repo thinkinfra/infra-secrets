@@ -115,11 +115,6 @@ creation_rules:
   - path_regex: secrets/sandbox/lending/.*\.yaml$
     shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
     key_groups:
-    # #lending
-    # - age:
-    #     - 'age1uehup3jrcx5dlar4q8p8vw57d4lwkc2hcdtkmqhcrdp0n6lhvyas05ruf2'
-    # - pgp:
-    #     - '7EFF431796D90A32826B4C84178F957C4F712CA5'
     # #default
     - kms:
       - arn: 'arn:aws:kms:us-east-1:644712362974:key/9d11b3d7-3b7c-4cde-ad6a-75a2721e0e27'
@@ -133,6 +128,11 @@ creation_rules:
           account: sops-sa
           region: us-west-2
           type: kms-master-key
+    #lending
+    - age:
+        - 'age1uehup3jrcx5dlar4q8p8vw57d4lwkc2hcdtkmqhcrdp0n6lhvyas05ruf2'
+    - pgp:
+        - '7EFF431796D90A32826B4C84178F957C4F712CA5'
 
 # staging
   - path_regex: secrets/staging/customer-experience/.*\.yaml$
