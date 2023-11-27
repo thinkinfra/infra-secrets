@@ -31,32 +31,16 @@ jobs:
       #     sudo apt-get update
       #     sudo apt-get install -y gnupg
 
-      # Set the PRIVATE_KEY and PUBLIC_KEY environment variables directly
-      - name: Set PGP Key Environment Variables for ${{ matrix.environment }} environment
+      # Import Generic PGP Keys (Private and Public)
+      - name: Import Generic PGP Keys
         run: |
-          case ${{ matrix.environment }} in
-            sandbox)
-              PRIVATE_KEY="${{ secrets.SANDBOX_PGP_PRIVATE_KEY }}"
-              PUBLIC_KEY="${{ secrets.SANDBOX_PGP_PUBLIC_KEY }}"
-              ;;
-            staging)
-              PRIVATE_KEY="${{ secrets.STAGING_PGP_PRIVATE_KEY }}"
-              PUBLIC_KEY="${{ secrets.STAGING_PGP_PUBLIC_KEY }}"
-              ;;
-            production)
-              PRIVATE_KEY="${{ secrets.PRODUCTION_PGP_PRIVATE_KEY }}"
-              PUBLIC_KEY="${{ secrets.PRODUCTION_PGP_PUBLIC_KEY }}"
-              ;;
-            *)
-              echo "Unsupported environment: ${{ matrix.environment }}"
-              exit 1
-              ;;
-          esac
-          echo "PRIVATE_KEY=$PRIVATE_KEY" >> $GITHUB_ENV
-          echo "PUBLIC_KEY=$PUBLIC_KEY" >> $GITHUB_ENV
+          echo "Importing Generic PGP private key..."
+          echo "${{ secrets.CI_PGP_PRIVATE_KEY }}" | gpg --batch --no-tty --import 2>&1
+          echo "Importing Generic PGP public key..."
+          echo "${{ secrets.CI_PGP_PUBLIC_KEY }}" | gpg --import 2>&1
 
       # Import Generic PGP Keys (Private and Public)
-      - name: Import PGP Keys and Capture Fingerprint
+      - name: Import PGP Keys and Capture Fingerprint for ${{ matrix.environment }} environment
         run: |
           import_and_extract_fingerprint() {
             PRIVATE_KEY="$1"
@@ -96,28 +80,21 @@ jobs:
           }
 
           # Use the environment variables
-          import_and_extract_fingerprint "$PRIVATE_KEY" "$PUBLIC_KEY"
-
-      # - name: Import Generic PGP Keys
-      #   run: |
-      #     gpg --version
-      #     echo "Importing Generic PGP private key..."
-      #     echo "${{ secrets.CI_PGP_PRIVATE_KEY }}" | gpg --batch --no-tty --import 2>&1
-      #     echo "Importing Generic PGP public key..."
-      #     echo "${{ secrets.CI_PGP_PUBLIC_KEY }}" | gpg --import 2>&1
-
-      # - name: Capture PGP Fingerprint
-      #   run: |
-      #     echo "Extracting fingerprint..."
-      #     FINGERPRINT=$(gpg --list-secret-keys --with-colons | grep '^fpr' | head -n 1 | cut -d':' -f10)
-
-      #     if [ -z "$FINGERPRINT" ]; then
-      #       echo "Failed to extract fingerprint"
-      #       exit 1
-      #     fi
-
-      #     echo "Fingerprint extracted: $FINGERPRINT"
-      #     echo "FINGERPRINT=$FINGERPRINT" >> $GITHUB_ENV
+          case "${{ matrix.environment }}" in
+            "sandbox")
+              import_and_extract_fingerprint "${{ secrets.SANDBOX_PGP_PRIVATE_KEY }}" "${{ secrets.SANDBOX_PGP_PUBLIC_KEY }}"
+              ;;
+            "staging")
+              import_and_extract_fingerprint "${{ secrets.STAGING_PGP_PRIVATE_KEY }}" "${{ secrets.STAGING_PGP_PUBLIC_KEY }}"
+              ;;
+            "production")
+              import_and_extract_fingerprint "${{ secrets.PRODUCTION_PGP_PRIVATE_KEY }}" "${{ secrets.PRODUCTION_PGP_PUBLIC_KEY }}"
+              ;;
+            *)
+              echo "::error ::Invalid secret category."
+              exit 1
+              ;;
+          esac
 
       # Export AGE Key
       - name: Set COMMON_AGE_KEY
