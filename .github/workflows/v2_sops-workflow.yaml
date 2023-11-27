@@ -126,7 +126,8 @@ jobs:
               touch "$decrypted_file_path"
 
               echo "Decrypting double-dot file: $file"
-              sops --verbose -d $file > $decrypted_file_path || echo "Decryption error, might continue if threshold is met"
+              # sops --verbose -d $file > $decrypted_file_path || echo "Decryption error, might continue if threshold is met"
+              sops --config configs/v1_sops.yaml --decrypt $file > $decrypted_file_path
             fi
           done
           # Debug: Check the contents of the decrypted YAML file
