@@ -32,11 +32,28 @@ jobs:
       #     sudo apt-get install -y gnupg
 
       # Set the PRIVATE_KEY and PUBLIC_KEY environment variables directly
-      - name: Set Secret Names
+      - name: Set PGP Key Environment Variables for ${{ matrix.environment }} environment
         run: |
-          ENVIRONMENT_UPPERCASE=$(echo "${{ matrix.environment }}" | awk '{print toupper($0)}')
-          echo "PRIVATE_KEY=${ENVIRONMENT_UPPERCASE}_PGP_PRIVATE_KEY" >> $GITHUB_ENV
-          echo "PUBLIC_KEY=${ENVIRONMENT_UPPERCASE}_PGP_PUBLIC_KEY" >> $GITHUB_ENV
+          case ${{ matrix.environment }} in
+            sandbox)
+              PRIVATE_KEY="${{ secrets.SANDBOX_PGP_PRIVATE_KEY }}"
+              PUBLIC_KEY="${{ secrets.SANDBOX_PGP_PUBLIC_KEY }}"
+              ;;
+            staging)
+              PRIVATE_KEY="${{ secrets.STAGING_PGP_PRIVATE_KEY }}"
+              PUBLIC_KEY="${{ secrets.STAGING_PGP_PUBLIC_KEY }}"
+              ;;
+            production)
+              PRIVATE_KEY="${{ secrets.PRODUCTION_PGP_PRIVATE_KEY }}"
+              PUBLIC_KEY="${{ secrets.PRODUCTION_PGP_PUBLIC_KEY }}"
+              ;;
+            *)
+              echo "Unsupported environment: ${{ matrix.environment }}"
+              exit 1
+              ;;
+          esac
+          echo "PRIVATE_KEY=$PRIVATE_KEY" >> $GITHUB_ENV
+          echo "PUBLIC_KEY=$PUBLIC_KEY" >> $GITHUB_ENV
 
       # Import Generic PGP Keys (Private and Public)
       - name: Import PGP Keys and Capture Fingerprint
