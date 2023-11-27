@@ -32,6 +32,10 @@ jobs:
       #     sudo apt-get update
       #     sudo apt-get install -y gnupg
 
+      - name: Install wget
+        run: |
+          sudo apt update && sudo apt install wget
+
       # Import Generic PGP Keys (Private and Public)
       - name: Import Generic PGP Keys
         run: |
