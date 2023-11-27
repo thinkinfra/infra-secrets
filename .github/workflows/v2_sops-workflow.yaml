@@ -67,20 +67,15 @@ jobs:
       - name: Copy v1_sops.yaml
         run: cp -f configs/v1_sops.yaml .sops.yaml
 
+      # - name: Install sops
+      #   run: |
+      #     wget https://github.com/mozilla/sops/releases/download/v3.7.1/sops_3.7.1_amd64.deb
+      #     sudo dpkg -i sops_3.7.1_amd64.deb
 
       - name: Install sops
         run: |
-          wget https://github.com/mozilla/sops/releases/download/v3.7.1/sops_3.7.1_amd64.deb
-          sudo dpkg -i sops_3.7.1_amd64.deb
-
-      # - name: Install sops
-      #   run: |
-      #     wget https://github.com/mozilla/sops/releases/download/v3.8.0/sops_3.8.0_amd64.deb
-      #     sudo dpkg -i sops_3.8.0_amd64.deb
-      # - name: Sops Binary Installer
-      #   uses: mdgreenwald/mozilla-sops-action@v1.5.0
-      #   with:
-      #     version: latest # default is latest stable
+          wget https://github.com/mozilla/sops/releases/download/v3.8.0/sops_3.8.0_amd64.deb
+          sudo dpkg -i sops_3.8.0_amd64.deb
 
       - name: Verify sops installation
         run: sops --version
