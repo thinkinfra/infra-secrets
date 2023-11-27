@@ -25,33 +25,81 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install GPG
+      # - name: Install GPG
+      #   run: |
+      #     gpg --version
+      #     sudo apt-get update
+      #     sudo apt-get install -y gnupg
+
+      # Set the secret names as environment variables
+      - name: Set Secret Names
         run: |
-          gpg --version
-          sudo apt-get update
-          sudo apt-get install -y gnupg
+          echo "PRIVATE_KEY_SECRET_NAME=${{ matrix.environment }}_PGP_PRIVATE_KEY" >> $GITHUB_ENV
+          echo "PUBLIC_KEY_SECRET_NAME=${{ matrix.environment }}_PGP_PUBLIC_KEY" >> $GITHUB_ENV
 
       # Import Generic PGP Keys (Private and Public)
-      - name: Import Generic PGP Keys
+      - name: Import PGP Keys and Capture Fingerprint
         run: |
-          gpg --version
-          echo "Importing Generic PGP private key..."
-          echo "${{ secrets.CI_PGP_PRIVATE_KEY }}" | gpg --batch --no-tty --import 2>&1
-          echo "Importing Generic PGP public key..."
-          echo "${{ secrets.CI_PGP_PUBLIC_KEY }}" | gpg --import 2>&1
+          import_and_extract_fingerprint() {
+            PRIVATE_KEY="$1"
+            PUBLIC_KEY="$2"
+            echo "Importing PGP private key..."
+            echo "$PRIVATE_KEY" | gpg --batch --no-tty --import 2>&1
+            gpg_error=$?
 
-      - name: Capture PGP Fingerprint
-        run: |
-          echo "Extracting fingerprint..."
-          FINGERPRINT=$(gpg --list-secret-keys --with-colons | grep '^fpr' | head -n 1 | cut -d':' -f10)
+            if [ $gpg_error -ne 0 ]; then
+              echo "Failed to import PGP private key, error code: $gpg_error"
+              exit $gpg_error
+            fi
 
-          if [ -z "$FINGERPRINT" ]; then
-            echo "Failed to extract fingerprint"
-            exit 1
-          fi
+            echo "Importing PGP public key..."
+            echo "$PUBLIC_KEY" | gpg --import 2>&1
+            gpg_error=$?
 
-          echo "Fingerprint extracted: $FINGERPRINT"
-          echo "FINGERPRINT=$FINGERPRINT" >> $GITHUB_ENV
+            if [ $gpg_error -ne 0 ]; then
+              echo "Failed to import PGP public key, error code: $gpg_error"
+              exit $gpg_error
+            fi
+
+            echo "Listing imported keys..."
+            gpg --list-keys
+            gpg --list-secret-keys
+
+            echo "Extracting fingerprint..."
+            FINGERPRINT=$(gpg --list-secret-keys --with-colons | grep '^fpr' | head -n 1 | cut -d':' -f10)
+
+            if [ -z "$FINGERPRINT" ]; then
+              echo "Failed to extract fingerprint"
+              exit 1
+            fi
+
+            echo "Fingerprint extracted: $FINGERPRINT"
+            echo "FINGERPRINT=$FINGERPRINT" >> $GITHUB_ENV
+          }
+
+          # Use the environment variables
+          import_and_extract_fingerprint "$PRIVATE_KEY" "$PUBLIC_KEY"
+
+      # - name: Import Generic PGP Keys
+      #   run: |
+      #     gpg --version
+      #     echo "Importing Generic PGP private key..."
+      #     echo "${{ secrets.CI_PGP_PRIVATE_KEY }}" | gpg --batch --no-tty --import 2>&1
+      #     echo "Importing Generic PGP public key..."
+      #     echo "${{ secrets.CI_PGP_PUBLIC_KEY }}" | gpg --import 2>&1
+
+      # - name: Capture PGP Fingerprint
+      #   run: |
+      #     echo "Extracting fingerprint..."
+      #     FINGERPRINT=$(gpg --list-secret-keys --with-colons | grep '^fpr' | head -n 1 | cut -d':' -f10)
+
+      #     if [ -z "$FINGERPRINT" ]; then
+      #       echo "Failed to extract fingerprint"
+      #       exit 1
+      #     fi
+
+      #     echo "Fingerprint extracted: $FINGERPRINT"
+      #     echo "FINGERPRINT=$FINGERPRINT" >> $GITHUB_ENV
 
       # Export AGE Key
       - name: Set COMMON_AGE_KEY

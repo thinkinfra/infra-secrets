@@ -132,6 +132,7 @@ creation_rules:
     - age:
         - 'age1uehup3jrcx5dlar4q8p8vw57d4lwkc2hcdtkmqhcrdp0n6lhvyas05ruf2'
     - pgp:
+        - 'FBBDA26E7AE5023C66D98453A93F3127586BD012'
         - '7EFF431796D90A32826B4C84178F957C4F712CA5'
 
 # staging
