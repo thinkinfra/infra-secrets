@@ -131,8 +131,8 @@ creation_rules:
     #lending
     - age:
         - 'age1uehup3jrcx5dlar4q8p8vw57d4lwkc2hcdtkmqhcrdp0n6lhvyas05ruf2'
-    # - pgp:
-    #     - '7EFF431796D90A32826B4C84178F957C4F712CA5'
+    - pgp:
+        - '7EFF431796D90A32826B4C84178F957C4F712CA5'
 
 # staging
   - path_regex: secrets/staging/customer-experience/.*\.yaml$

@@ -53,10 +53,6 @@ jobs:
           echo "Fingerprint extracted: $FINGERPRINT"
           echo "FINGERPRINT=$FINGERPRINT" >> $GITHUB_ENV
 
-      - name: Use Fingerprint in Another Step
-        run: |
-          echo "The captured fingerprint is $FINGERPRINT"
-
       # Export AGE Key
       - name: Set COMMON_AGE_KEY
         run: |
@@ -66,11 +62,6 @@ jobs:
 
       - name: Copy v1_sops.yaml
         run: cp -f configs/v1_sops.yaml .sops.yaml
-
-      # - name: Install sops
-      #   run: |
-      #     wget https://github.com/mozilla/sops/releases/download/v3.7.1/sops_3.7.1_amd64.deb
-      #     sudo dpkg -i sops_3.7.1_amd64.deb
 
       - name: Install sops
         run: |
