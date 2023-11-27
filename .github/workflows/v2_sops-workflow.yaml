@@ -167,7 +167,7 @@ jobs:
               # Construct the Vault path
               filename_without_extension="$(basename $decrypted_file .yaml)"
               IFS='.' read -r secret_name sub_path <<< "$filename_without_extension"
-              vault_path="secret/data/$secret_name/$sub_path"
+              vault_path="secret/$secret_name/$sub_path"
               echo "Uploading to Vault at path: $vault_path"
 
               # Upload to Vault
