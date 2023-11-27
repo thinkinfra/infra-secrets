@@ -31,11 +31,18 @@ jobs:
       #     sudo apt-get update
       #     sudo apt-get install -y gnupg
 
-      # Set the secret names as environment variables
+      # Set the secret names as environment variables in uppercase
       - name: Set Secret Names
         run: |
-          echo "PRIVATE_KEY_SECRET_NAME=${{ matrix.environment }}_PGP_PRIVATE_KEY" >> $GITHUB_ENV
-          echo "PUBLIC_KEY_SECRET_NAME=${{ matrix.environment }}_PGP_PUBLIC_KEY" >> $GITHUB_ENV
+          ENVIRONMENT_UPPERCASE="${{ matrix.environment }}^^"
+          echo "PRIVATE_KEY_SECRET_NAME=${ENVIRONMENT_UPPERCASE}_PGP_PRIVATE_KEY" >> $GITHUB_ENV
+          echo "PUBLIC_KEY_SECRET_NAME=${ENVIRONMENT_UPPERCASE}_PGP_PUBLIC_KEY" >> $GITHUB_ENV
+
+      # Export secrets as environment variables
+      - name: Set PGP Key Environment Variables
+        run: |
+          echo "PRIVATE_KEY=${{ secrets[env.PRIVATE_KEY_SECRET_NAME] }}" >> $GITHUB_ENV
+          echo "PUBLIC_KEY=${{ secrets[env.PUBLIC_KEY_SECRET_NAME] }}" >> $GITHUB_ENV
 
       # Import Generic PGP Keys (Private and Public)
       - name: Import PGP Keys and Capture Fingerprint
