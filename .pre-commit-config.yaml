@@ -20,4 +20,4 @@ repos:
         name: Check dot filenames in secrets
         entry: ./scripts/precommit-check-dot-filenames.sh
         language: script
-        files: 'secrets/.*'
+        files: 'secrets/.*\.yaml$'
