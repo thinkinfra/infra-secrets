@@ -189,11 +189,30 @@ jobs:
               fi
             fi
           done
-          # Debug: Check the contents of the decrypted YAML file
-          for decrypted_file in "$decrypted_directory"/*.yaml; do
-            echo "Decrypted YAML content for $decrypted_file:"
-            cat "$decrypted_file"
-          done
+
+      - if: env.RELEVANT_CHANGES == 'true'
+        name: Check Contents of Decrypted YAML Files
+        run: |
+          set -e
+          IFS=' ' read -r -a modified_files <<< "${{ steps.files.outputs.added_modified }}"
+          if [[ ${#modified_files[@]} -eq 0 ]]; then
+            echo "No modified files found."
+            exit 0
+          fi
+
+          # Extract the folder name from the first modified file
+          path_components=(${modified_files[0]//\// })
+          folder_name=${path_components[2]}  # Adjust the index based on your directory structure
+
+          decrypted_directory="secrets/${{ matrix.environment }}/$folder_name/decrypted"
+          if compgen -G "$decrypted_directory/*.yaml" > /dev/null; then
+            for decrypted_file in "$decrypted_directory"/*.yaml; do
+              echo "Decrypted YAML content for $decrypted_file:"
+              cat "$decrypted_file" || echo "Error displaying $decrypted_file"
+            done
+          else
+            echo "No decrypted files found in $decrypted_directory"
+          fi
 
       - if: env.RELEVANT_CHANGES == 'true'
         name: Process Secret Files
