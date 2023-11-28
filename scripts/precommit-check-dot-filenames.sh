@@ -3,19 +3,24 @@
 # Initialize a flag to indicate an error
 error_found=0
 
-# Loop through files in the 'secrets' directory
-for file in $(find secrets -type f -name "*.*.*"); do
-    if [[ $(basename "$file") =~ (\.{3})\.yaml$ ]]; then
-        # Triple-dotted filenames found
-        echo "Error: Triple-dotted filename not allowed: $file"
+# Loop through YAML files in the 'secrets' directory
+for file in $(find secrets -type f -name "*.yaml"); do
+    filename=$(basename "$file")
+
+    # Count the number of dots in the filename (excluding the extension)
+    dot_count=$(grep -o "\." <<< "$filename" | grep -c .)
+
+    if [ $dot_count -gt 2 ]; then
+        # Filenames with more than two dots (excluding the .yaml extension)
+        echo "Error: Filename with more than two dots not allowed: $file"
         error_found=1
-    elif [[ $(basename "$file") =~ (\.{2})\.yaml$ ]]; then
-        # Double-dotted filenames found
-        echo "INFO: Double-dotted filename is used for sub-path: $file"
+    elif [ $dot_count -eq 2 ]; then
+        # Filenames with exactly two dots
+        echo "Warning: Double-dotted filename detected: $file"
     fi
 done
 
-# Exit with an error status if a triple-dotted filename was found
+# Exit with an error status if a problematic filename was found
 if [ $error_found -eq 1 ]; then
     exit 1
 fi
