@@ -9,7 +9,7 @@ for file in $(find secrets -type f -name "*.*.*"); do
         # Triple-dotted filenames found
         echo "Error: Triple-dotted filename not allowed: $file"
         error_found=1
-    elif [[ $file == *".."* ]]; then
+    elif [[ $(basename "$file") =~ (\.{2})\.yaml$ ]]; then
         # Double-dotted filenames found
         echo "INFO: Double-dotted filename is used for sub-path: $file"
     fi
