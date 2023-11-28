@@ -5,7 +5,7 @@ error_found=0
 
 # Loop through files in the 'secrets' directory
 for file in $(find secrets -type f -name "*.*.*"); do
-    if [[ $file == *"...*" ]]; then
+    if [[ $(basename "$file") =~ (\.{3})\.yaml$ ]]; then
         # Triple-dotted filenames found
         echo "Error: Triple-dotted filename not allowed: $file"
         error_found=1
