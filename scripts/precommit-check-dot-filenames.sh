@@ -20,7 +20,7 @@ for file in $(find secrets -type f -name "*.yaml"); do
         # Filenames with more than two dots (excluding the .yaml extension)
         echo -e "${RED}ERROR: Filename with more than two dots are not allowed: $file${NC}"
         error_found=1
-        error_message="Commit failed: Filenames with more than two dots are not allowed in 'secrets' directory."
+        error_message="Commit Failed: Filenames with more than two dots are not allowed in 'secrets' directory."
     elif [ $dot_count -eq 2 ]; then
         # Filenames with exactly two dots
         echo -e "${GREEN}INFO: Double-dotted filename detected: $file${NC}"
