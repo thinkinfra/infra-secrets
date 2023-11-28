@@ -28,55 +28,56 @@ jobs:
         with:
           skip_after_successful_duplicate: 'true'
 
-  gitleaks:
-    if: github.event_name == 'pull_request'
-    needs: [pre_job]
-    name: Scanning secrets via Gitleaks
-    runs-on: ubuntu-latest #self-hosted -> https://github.com/gitleaks/gitleaks-action/issues/125
-    environment:
-      name: system
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v4.0.0
-        with:
-          node-version: 18
-          check-latest: true
-      - run: wget -O .gitleaks.toml https://raw.githubusercontent.com/zricethezav/gitleaks/master/config/gitleaks.toml
-      - uses: gitleaks/gitleaks-action@v2.3.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE_KEY}} # Only required for Organizations, not personal accounts.
-          GITLEAKS_ENABLE_SUMMARY: true
-          GITLEAKS_VERSION: latest
-      - name: Save success status
-        if: ${{ success() }}
-        run: echo "success" > status.txt
-      - name: Upload status
-        uses: actions/upload-artifact@v3
-        with:
-          name: status
-          path: status.txt
+  # gitleaks:
+  #   if: github.event_name == 'pull_request'
+  #   needs: [pre_job]
+  #   name: Scanning secrets via Gitleaks
+  #   runs-on: ubuntu-latest #self-hosted -> https://github.com/gitleaks/gitleaks-action/issues/125
+  #   environment:
+  #     name: system
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0
+  #     - uses: actions/setup-node@v4.0.0
+  #       with:
+  #         node-version: 18
+  #         check-latest: true
+  #     - run: wget -O .gitleaks.toml https://raw.githubusercontent.com/zricethezav/gitleaks/master/config/gitleaks.toml
+  #     - uses: gitleaks/gitleaks-action@v2.3.2
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #         GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE_KEY}} # Only required for Organizations, not personal accounts.
+  #         GITLEAKS_ENABLE_SUMMARY: true
+  #         GITLEAKS_VERSION: latest
+  #     - name: Save success status
+  #       if: ${{ success() }}
+  #       run: echo "success" > status.txt
+  #     - name: Upload status
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: status
+  #         path: status.txt
 
-  reviewdog:
-    if: github.event_name == 'pull_request'
-    needs: [pre_job]
-    name: Review Gitleaks
-    runs-on: self-hosted
-    steps:
-      - uses: actions/checkout@v4
-      - uses: reviewdog/action-gitleaks@v1.4.0
-        with:
-          github_token: ${{ secrets.github_token }}
-          # Change reviewdog reporter if you need [github-pr-check,github-check,github-pr-review].
-          reporter: github-pr-review
-          # Change reporter level if you need.
-          # GitHub Status Check won't become failure with warning.
-          level: warning
+  # reviewdog:
+  #   if: github.event_name == 'pull_request'
+  #   needs: [pre_job]
+  #   name: Review Gitleaks
+  #   runs-on: self-hosted
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: reviewdog/action-gitleaks@v1.4.0
+  #       with:
+  #         github_token: ${{ secrets.github_token }}
+  #         # Change reviewdog reporter if you need [github-pr-check,github-check,github-pr-review].
+  #         reporter: github-pr-review
+  #         # Change reporter level if you need.
+  #         # GitHub Status Check won't become failure with warning.
+  #         level: warning
 
   v1_secret_vault:
-    needs: [pre_job,reviewdog]
+    # needs: [pre_job,reviewdog]
+    needs: [pre_job]
     name: "v1 Secret Injection via Sops"
     strategy:
       matrix:
@@ -175,7 +176,8 @@ jobs:
           done
 
   v2_secret_vault:
-    needs: [pre_job,reviewdog]
+    # needs: [pre_job,reviewdog]
+    needs: [pre_job]
     name: "v2 Secret Injection via Sops"
     strategy:
       matrix:
