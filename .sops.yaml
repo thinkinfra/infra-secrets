@@ -26,10 +26,10 @@ destination_rules:
     vault_kv_version: 2 # default
     path_regex: secrets/staging/infra/*
     omit_extensions: true
-  - vault_path: "secret/"
+  - vault_path: "/"
     vault_kv_mount_name: "secret-v2/" # default
     vault_kv_version: 2 # default
-    path_regex: production/infra/*
+    path_regex: secrets/production/infra/*
     omit_extensions: true
 # customer-experience - v1
   - vault_path: "/"
@@ -127,7 +127,10 @@ creation_rules:
           type: kms-master-key
     #customer-experience
     - age:
-        - 'age1dvux7y9uxf362c8j9tw6ug3acmhjdljwzx3h5asrp47sujrdyecq42gqx4'
+        - 'age1uehup3jrcx5dlar4q8p8vw57d4lwkc2hcdtkmqhcrdp0n6lhvyas05ruf2'
+    - pgp:
+        - 'FBBDA26E7AE5023C66D98453A93F3127586BD012'
+        - '7EFF431796D90A32826B4C84178F957C4F712CA5'
   - path_regex: secrets/sandbox/infra/.*\.yaml$
     shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
     key_groups:
@@ -156,7 +159,10 @@ creation_rules:
           type: kms-master-key
     #infra
     - age:
-        - 'age1kqcdx46gv7stajxenms5t83af8huc39qe450kzen55sk3kg4fdaqek48m0'
+        - 'age1uehup3jrcx5dlar4q8p8vw57d4lwkc2hcdtkmqhcrdp0n6lhvyas05ruf2'
+    - pgp:
+        - 'FBBDA26E7AE5023C66D98453A93F3127586BD012'
+        - '7EFF431796D90A32826B4C84178F957C4F712CA5'
   - path_regex: secrets/sandbox/lending/.*\.yaml$
     shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
     key_groups:
@@ -185,7 +191,10 @@ creation_rules:
           type: kms-master-key
     #lending
     - age:
-        - 'age1vulxu3tcmzc7uf4nk7m7fsta2mj475q50gwgma2swsrgzds62vcs3zw5l2'
+        - 'age1uehup3jrcx5dlar4q8p8vw57d4lwkc2hcdtkmqhcrdp0n6lhvyas05ruf2'
+    - pgp:
+        - 'FBBDA26E7AE5023C66D98453A93F3127586BD012'
+        - '7EFF431796D90A32826B4C84178F957C4F712CA5'
 
 # staging
   - path_regex: secrets/staging/customer-experience/.*\.yaml$
@@ -206,7 +215,10 @@ creation_rules:
           type: kms-master-key
     #customer-experience
     - age:
-        - 'age1dvux7y9uxf362c8j9tw6ug3acmhjdljwzx3h5asrp47sujrdyecq42gqx4'
+        - 'age1uehup3jrcx5dlar4q8p8vw57d4lwkc2hcdtkmqhcrdp0n6lhvyas05ruf2'
+    - pgp:
+        - '7246137C29494AB51DB9DC75A503AED1209A6985'
+        - '7EFF431796D90A32826B4C84178F957C4F712CA5'
   - path_regex: secrets/staging/infra/.*\.yaml$
     shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
     key_groups:
@@ -225,7 +237,10 @@ creation_rules:
           type: kms-master-key
     #infra
     - age:
-        - 'age1kqcdx46gv7stajxenms5t83af8huc39qe450kzen55sk3kg4fdaqek48m0'
+        - 'age1uehup3jrcx5dlar4q8p8vw57d4lwkc2hcdtkmqhcrdp0n6lhvyas05ruf2'
+    - pgp:
+        - '7246137C29494AB51DB9DC75A503AED1209A6985'
+        - '7EFF431796D90A32826B4C84178F957C4F712CA5'
   - path_regex: secrets/staging/lending/.*\.yaml$
     shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
     key_groups:
@@ -244,7 +259,10 @@ creation_rules:
           type: kms-master-key
     #lending
     - age:
-        - 'age1vulxu3tcmzc7uf4nk7m7fsta2mj475q50gwgma2swsrgzds62vcs3zw5l2'
+        - 'age1uehup3jrcx5dlar4q8p8vw57d4lwkc2hcdtkmqhcrdp0n6lhvyas05ruf2'
+    - pgp:
+        - '7246137C29494AB51DB9DC75A503AED1209A6985'
+        - '7EFF431796D90A32826B4C84178F957C4F712CA5'
 
 # production
   - path_regex: secrets/production/customer-experience/.*\.yaml$
@@ -265,7 +283,10 @@ creation_rules:
           type: kms-master-key
     #customer-experience
     - age:
-        - 'age1dvux7y9uxf362c8j9tw6ug3acmhjdljwzx3h5asrp47sujrdyecq42gqx4'
+        - 'age1uehup3jrcx5dlar4q8p8vw57d4lwkc2hcdtkmqhcrdp0n6lhvyas05ruf2'
+    - pgp:
+        - '9BC1204B386DC64785CDFDF35AD58514798366A8'
+        - '7EFF431796D90A32826B4C84178F957C4F712CA5'
   - path_regex: secrets/production/infra/.*\.yaml$
     shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
     key_groups:
@@ -284,7 +305,10 @@ creation_rules:
           type: kms-master-key
     #infra
     - age:
-        - 'age1kqcdx46gv7stajxenms5t83af8huc39qe450kzen55sk3kg4fdaqek48m0'
+        - 'age1uehup3jrcx5dlar4q8p8vw57d4lwkc2hcdtkmqhcrdp0n6lhvyas05ruf2'
+    - pgp:
+        - '9BC1204B386DC64785CDFDF35AD58514798366A8'
+        - '7EFF431796D90A32826B4C84178F957C4F712CA5'
   - path_regex: secrets/production/lending/.*\.yaml$
     shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
     key_groups:
@@ -303,10 +327,13 @@ creation_rules:
           type: kms-master-key
     #lending
     - age:
-        - 'age1vulxu3tcmzc7uf4nk7m7fsta2mj475q50gwgma2swsrgzds62vcs3zw5l2'
+        - 'age1uehup3jrcx5dlar4q8p8vw57d4lwkc2hcdtkmqhcrdp0n6lhvyas05ruf2'
+    - pgp:
+        - '9BC1204B386DC64785CDFDF35AD58514798366A8'
+        - '7EFF431796D90A32826B4C84178F957C4F712CA5'
 
-# path: /age-keys
-  - path_regex: age-keys/infra/.*\.txt$
+# path: /ghaction-keys
+  - path_regex: keys/*/.*\.(txt|gpg)$
     unencrypted-suffix: '^(AGE-SECRET-KEY-*)$'
     shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
     key_groups:
@@ -315,63 +342,28 @@ creation_rules:
       - arn: 'arn:aws:kms:us-east-1:644712362974:key/9d11b3d7-3b7c-4cde-ad6a-75a2721e0e27'
         context:
           account: sops-sa
-          type: age-master-key
+          region: us-east-1
+          type: kms-master-key
       - arn: 'arn:aws:kms:us-east-1:644712362974:key/978a683a-4864-4537-88fb-2dc8ea4f8080'
         context:
-          account: default
-          type: age-master-key
+          account: vault-sa
+          region: us-east-1
+          type: kms-master-key
     - kms:
       - arn: 'arn:aws:kms:us-west-2:644712362974:key/9d994675-3143-4b2a-a920-459c87207998'
         context:
           account: sops-sa
-          type: age-master-key
+          region: us-west-2
+          type: kms-master-key
       - arn: 'arn:aws:kms:us-west-2:644712362974:key/5dcee9a6-72f1-4a7f-bdfe-f7be9ad02b72'
         context:
-          account: default
-          type: age-master-key
-  - path_regex: age-keys/lending/.*\.txt$
-    unencrypted-suffix: '^(AGE-SECRET-KEY-*)$'
-    shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
-    key_groups:
-    #default
-    - kms:
-      - arn: 'arn:aws:kms:us-east-1:644712362974:key/9d11b3d7-3b7c-4cde-ad6a-75a2721e0e27'
-        context:
-          account: sops-sa
-          type: age-master-key
-      - arn: 'arn:aws:kms:us-east-1:644712362974:key/978a683a-4864-4537-88fb-2dc8ea4f8080'
-        context:
-          account: default
-          type: age-master-key
-    - kms:
-      - arn: 'arn:aws:kms:us-west-2:644712362974:key/9d994675-3143-4b2a-a920-459c87207998'
-        context:
-          account: sops-sa
-          type: age-master-key
-      - arn: 'arn:aws:kms:us-west-2:644712362974:key/5dcee9a6-72f1-4a7f-bdfe-f7be9ad02b72'
-        context:
-          account: default
-          type: age-master-key
-  - path_regex: age-keys/customer-experience/.*\.txt$
-    unencrypted-suffix: '^(AGE-SECRET-KEY-*)$'
-    shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
-    key_groups:
-    #default
-    - kms:
-      - arn: 'arn:aws:kms:us-east-1:644712362974:key/9d11b3d7-3b7c-4cde-ad6a-75a2721e0e27'
-        context:
-          account: sops-sa
-          type: age-master-key
-      - arn: 'arn:aws:kms:us-east-1:644712362974:key/978a683a-4864-4537-88fb-2dc8ea4f8080'
-        context:
-          account: default
-          type: age-master-key
-    - kms:
-      - arn: 'arn:aws:kms:us-west-2:644712362974:key/9d994675-3143-4b2a-a920-459c87207998'
-        context:
-          account: sops-sa
-          type: age-master-key
-      - arn: 'arn:aws:kms:us-west-2:644712362974:key/5dcee9a6-72f1-4a7f-bdfe-f7be9ad02b72'
-        context:
-          account: default
-          type: age-master-key
+          account: vault-sa
+          region: us-west-2
+          type: kms-master-key
+    - age:
+        - 'age1uehup3jrcx5dlar4q8p8vw57d4lwkc2hcdtkmqhcrdp0n6lhvyas05ruf2'
+    - pgp:
+        - 'FBBDA26E7AE5023C66D98453A93F3127586BD012'
+        - '7246137C29494AB51DB9DC75A503AED1209A6985'
+        - '9BC1204B386DC64785CDFDF35AD58514798366A8'
+        - '7EFF431796D90A32826B4C84178F957C4F712CA5'
