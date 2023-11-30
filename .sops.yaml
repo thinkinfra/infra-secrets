@@ -126,11 +126,11 @@ creation_rules:
           region: us-west-2
           type: kms-master-key
     #customer-experience
-    - age:
-        - 'age1uehup3jrcx5dlar4q8p8vw57d4lwkc2hcdtkmqhcrdp0n6lhvyas05ruf2'
-    - pgp:
-        - 'FBBDA26E7AE5023C66D98453A93F3127586BD012'
-        - '7EFF431796D90A32826B4C84178F957C4F712CA5'
+    # - age:
+    #     - 'age1uehup3jrcx5dlar4q8p8vw57d4lwkc2hcdtkmqhcrdp0n6lhvyas05ruf2'
+    # - pgp:
+    #     - 'FBBDA26E7AE5023C66D98453A93F3127586BD012'
+    #     - '7EFF431796D90A32826B4C84178F957C4F712CA5'
   - path_regex: secrets/sandbox/infra/.*\.yaml$
     shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
     key_groups:
@@ -158,11 +158,11 @@ creation_rules:
           region: us-west-2
           type: kms-master-key
     #infra
-    - age:
-        - 'age1uehup3jrcx5dlar4q8p8vw57d4lwkc2hcdtkmqhcrdp0n6lhvyas05ruf2'
-    - pgp:
-        - 'FBBDA26E7AE5023C66D98453A93F3127586BD012'
-        - '7EFF431796D90A32826B4C84178F957C4F712CA5'
+    # - age:
+    #     - 'age1uehup3jrcx5dlar4q8p8vw57d4lwkc2hcdtkmqhcrdp0n6lhvyas05ruf2'
+    # - pgp:
+    #     - 'FBBDA26E7AE5023C66D98453A93F3127586BD012'
+    #     - '7EFF431796D90A32826B4C84178F957C4F712CA5'
   - path_regex: secrets/sandbox/lending/.*\.yaml$
     shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
     key_groups:
@@ -190,11 +190,11 @@ creation_rules:
           region: us-west-2
           type: kms-master-key
     #lending
-    - age:
-        - 'age1uehup3jrcx5dlar4q8p8vw57d4lwkc2hcdtkmqhcrdp0n6lhvyas05ruf2'
-    - pgp:
-        - 'FBBDA26E7AE5023C66D98453A93F3127586BD012'
-        - '7EFF431796D90A32826B4C84178F957C4F712CA5'
+    # - age:
+    #     - 'age1uehup3jrcx5dlar4q8p8vw57d4lwkc2hcdtkmqhcrdp0n6lhvyas05ruf2'
+    # - pgp:
+    #     - 'FBBDA26E7AE5023C66D98453A93F3127586BD012'
+    #     - '7EFF431796D90A32826B4C84178F957C4F712CA5'
 
 # staging
   - path_regex: secrets/staging/customer-experience/.*\.yaml$
@@ -214,11 +214,11 @@ creation_rules:
           region: us-west-2
           type: kms-master-key
     #customer-experience
-    - age:
-        - 'age1uehup3jrcx5dlar4q8p8vw57d4lwkc2hcdtkmqhcrdp0n6lhvyas05ruf2'
-    - pgp:
-        - '7246137C29494AB51DB9DC75A503AED1209A6985'
-        - '7EFF431796D90A32826B4C84178F957C4F712CA5'
+    # - age:
+    #     - 'age1uehup3jrcx5dlar4q8p8vw57d4lwkc2hcdtkmqhcrdp0n6lhvyas05ruf2'
+    # - pgp:
+    #     - '7246137C29494AB51DB9DC75A503AED1209A6985'
+    #     - '7EFF431796D90A32826B4C84178F957C4F712CA5'
   - path_regex: secrets/staging/infra/.*\.yaml$
     shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
     key_groups:
@@ -236,11 +236,11 @@ creation_rules:
           region: us-west-2
           type: kms-master-key
     #infra
-    - age:
-        - 'age1uehup3jrcx5dlar4q8p8vw57d4lwkc2hcdtkmqhcrdp0n6lhvyas05ruf2'
-    - pgp:
-        - '7246137C29494AB51DB9DC75A503AED1209A6985'
-        - '7EFF431796D90A32826B4C84178F957C4F712CA5'
+    # - age:
+    #     - 'age1uehup3jrcx5dlar4q8p8vw57d4lwkc2hcdtkmqhcrdp0n6lhvyas05ruf2'
+    # - pgp:
+    #     - '7246137C29494AB51DB9DC75A503AED1209A6985'
+    #     - '7EFF431796D90A32826B4C84178F957C4F712CA5'
   - path_regex: secrets/staging/lending/.*\.yaml$
     shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
     key_groups:
@@ -258,11 +258,11 @@ creation_rules:
           region: us-west-2
           type: kms-master-key
     #lending
-    - age:
-        - 'age1uehup3jrcx5dlar4q8p8vw57d4lwkc2hcdtkmqhcrdp0n6lhvyas05ruf2'
-    - pgp:
-        - '7246137C29494AB51DB9DC75A503AED1209A6985'
-        - '7EFF431796D90A32826B4C84178F957C4F712CA5'
+    # - age:
+    #     - 'age1uehup3jrcx5dlar4q8p8vw57d4lwkc2hcdtkmqhcrdp0n6lhvyas05ruf2'
+    # - pgp:
+    #     - '7246137C29494AB51DB9DC75A503AED1209A6985'
+    #     - '7EFF431796D90A32826B4C84178F957C4F712CA5'
 
 # production
   - path_regex: secrets/production/customer-experience/.*\.yaml$
@@ -282,11 +282,11 @@ creation_rules:
           region: us-west-2
           type: kms-master-key
     #customer-experience
-    - age:
-        - 'age1uehup3jrcx5dlar4q8p8vw57d4lwkc2hcdtkmqhcrdp0n6lhvyas05ruf2'
-    - pgp:
-        - '9BC1204B386DC64785CDFDF35AD58514798366A8'
-        - '7EFF431796D90A32826B4C84178F957C4F712CA5'
+    # - age:
+    #     - 'age1uehup3jrcx5dlar4q8p8vw57d4lwkc2hcdtkmqhcrdp0n6lhvyas05ruf2'
+    # - pgp:
+    #     - '9BC1204B386DC64785CDFDF35AD58514798366A8'
+    #     - '7EFF431796D90A32826B4C84178F957C4F712CA5'
   - path_regex: secrets/production/infra/.*\.yaml$
     shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
     key_groups:
@@ -304,11 +304,11 @@ creation_rules:
           region: us-west-2
           type: kms-master-key
     #infra
-    - age:
-        - 'age1uehup3jrcx5dlar4q8p8vw57d4lwkc2hcdtkmqhcrdp0n6lhvyas05ruf2'
-    - pgp:
-        - '9BC1204B386DC64785CDFDF35AD58514798366A8'
-        - '7EFF431796D90A32826B4C84178F957C4F712CA5'
+    # - age:
+    #     - 'age1uehup3jrcx5dlar4q8p8vw57d4lwkc2hcdtkmqhcrdp0n6lhvyas05ruf2'
+    # - pgp:
+    #     - '9BC1204B386DC64785CDFDF35AD58514798366A8'
+    #     - '7EFF431796D90A32826B4C84178F957C4F712CA5'
   - path_regex: secrets/production/lending/.*\.yaml$
     shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
     key_groups:
@@ -326,11 +326,11 @@ creation_rules:
           region: us-west-2
           type: kms-master-key
     #lending
-    - age:
-        - 'age1uehup3jrcx5dlar4q8p8vw57d4lwkc2hcdtkmqhcrdp0n6lhvyas05ruf2'
-    - pgp:
-        - '9BC1204B386DC64785CDFDF35AD58514798366A8'
-        - '7EFF431796D90A32826B4C84178F957C4F712CA5'
+    # - age:
+    #     - 'age1uehup3jrcx5dlar4q8p8vw57d4lwkc2hcdtkmqhcrdp0n6lhvyas05ruf2'
+    # - pgp:
+    #     - '9BC1204B386DC64785CDFDF35AD58514798366A8'
+    #     - '7EFF431796D90A32826B4C84178F957C4F712CA5'
 
 # path: /ghaction-keys
   - path_regex: keys/*/.*\.(txt|gpg)$
