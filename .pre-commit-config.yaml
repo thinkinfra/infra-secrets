@@ -13,3 +13,11 @@ repos:
     rev: v1.6.26
     hooks:
       - id: actionlint
+
+  - repo: local
+    hooks:
+      - id: check-dot-filenames
+        name: Check double-dotted filenames in secrets
+        entry: ./scripts/precommit-check-dot-filenames.sh
+        language: script
+        files: 'secrets/.*\.yaml$'

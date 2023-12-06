@@ -59,7 +59,7 @@ credentials
 
 # IDE related
 .vscode/*
-.envrc
+.envrc*
 deploy/toolchain/zsh/.zsh_history
 
 # ASDF tool
