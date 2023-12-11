@@ -2,32 +2,58 @@
 
 Repository for managing vault secrets.
 
-## Setup
-
-- Pre-commit: `brew install pre-commit && pre-commit install`
-- SOPS: `brew install sops`
-
 ## Shift-Left with SAML, AWS IAM, and AGE Keys
 
 This guide provides steps for setting up pre-commit hooks, managing secrets, and integrating SAML-based authentication with AWS IAM for KMS access.
 
 ## Table of Contents
 
-1. [Pre-commit and Pre-requisites](#pre-commit-and-pre-requisites)
-2. [Managing Secrets](#managing-secrets)
-3. [SAML Authentication with AWS IAM](#saml-authentication-with-aws-iam-using-okta)
-4. [Workflows](#workflows-configuration)
-5. [Setup and Contributions](#setup-and-contributions)
-6. [Disclaimer](#disclaimer)
+1. [TLDR - Video & Presentation](#video-and-presentation)
+2. [Pre-commit and Pre-requisites](#pre-commit-and-sops-pre-requisites)
+4. [Managing Secrets](#managing-secrets)
+5. [SAML Authentication with AWS IAM](#saml-authentication-with-aws-iam-using-okta)
+6. [Workflows](#workflows-configuration)
+7. [Setup and Contributions](#setup-and-contributions)
+8. [Disclaimer](#disclaimer)
 
-## Pre-commit and Pre-requisites
+## Video and Presentation
 
+- [Demo](https://earnest.zoom.us/rec/share/5pza2S4CwfMvyaNTB0gmF1qN8zHOhj4kiAe8o9Z8z1i72gK_5NZdQcKRqohcW-XW.iSTjK6i-1BpQNUjz)
+-> **Passcode:** 2ff4e&E4
+
+- [Presentation](https://docs.google.com/presentation/d/1Yrqq4AgMq5SdXSyCOiXWXcHVzgMxF7BNETbUCFgFfY8/edit?usp=sharing)
+
+## Pre-commit and Sops Pre-requisites
 ```bash
 git clone https://github.com/meetearnest/infra-secrets.git
 cd infra-secrets
+```
+
+### Sops
+SOPS is an editor of encrypted files that supports YAML, JSON, ENV, INI and BINARY formats and encrypts with AWS KMS, GCP KMS, Azure Key Vault, age, and PGP.
+```bash
+#sops using brew
+brew install sops
+
+#or using asdf
+brew unlink sops
+asdf plugin-add sops https://github.com/feniix/asdf-sops.git
+asdf install sops 3.8.0
+```
+
+### Pre-commit
+The pre-commit hook is run first, before you even type in a commit message. It's used to inspect the snapshot that's about to be committed, to see if you've forgotten something, to make sure tests run, or to examine whatever you need to inspect in the code.
+
+```bash
+#pre-commit using pip
 pip install pre-commit
 pre-commit install
+
+#or using brew
+brew install pre-commit && pre-commit install
 ```
+
+
 
 ## SAML Authentication with AWS IAM using OKTA
 
