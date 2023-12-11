@@ -17,8 +17,8 @@ This guide provides steps for setting up pre-commit hooks, managing secrets, and
 2. [Managing Secrets](#managing-secrets)
 3. [SAML Authentication with AWS IAM](#saml-authentication-with-aws-iam-using-okta)
 4. [Workflows](#workflows-configuration)
-4. [Setup and Contributions](#setup-and-contributions)
-4. [Disclaimer](#disclaimer)
+5. [Setup and Contributions](#setup-and-contributions)
+6. [Disclaimer](#disclaimer)
 
 ## Pre-commit and Pre-requisites
 
@@ -34,9 +34,9 @@ pre-commit install
 Details on integrating Okta as a SAML Identity Provider (IdP) with AWS IAM for secure, federated access to AWS resources, including KMS.
 
 
-**SAML**: Using SAML (Security Assertion Markup Language) typically involves the following:
-<https://meetearnest.atlassian.net/wiki/spaces/EN/pages/2717089856/Migrate+from+aws-sts-token-generator+to+saml2aws>
+[How to Setup SAML](https://meetearnest.atlassian.net/wiki/spaces/EN/pages/2717089856/Migrate+from+aws-sts-token-generator+to+saml2aws)
 
+Using SAML (Security Assertion Markup Language) typically involves the following:
 
 - Identity Provider (IdP) Setup: Configure a SAML IdP like Okta or OneLogin. This includes setting up user accounts and groups.
 - Service Provider (SP) Configuration: Configure the application or service (like AWS, Google Apps, etc.) to use SAML for authentication. This often involves uploading IdP metadata to the SP and configuring SAML settings.
@@ -45,8 +45,10 @@ Details on integrating Okta as a SAML Identity Provider (IdP) with AWS IAM for s
 - Access Control: The SP uses the SAML assertion to grant access to the user. The level of access is usually determined by the user's role or group memberships specified in the assertion.
 - Single Sign-On (SSO): SAML enables SSO, allowing users to access multiple services with a single authentication at the IdP.
 
+For instance, to configure your application, use the following command:
 ```bash
-source ~/.secrets/saml2aws.sh sandbox                 
+# This is an example, replace 'your-config' with your actual configuration details
+source ~/.secrets/saml2aws.sh sandbox
 
 account {
   DisableSessions: false
@@ -74,8 +76,6 @@ Your new access key pair has been stored in the AWS configuration.
 Note that it will expire at 2023-12-11 12:39:38 -0800 PST
 To use this credential, call the AWS CLI with the --profile option (e.g. aws --profile Okta-Sandbox-Administrator ec2 describe-instances).
 ```
-
-
 
 
 ## Managing Secrets
@@ -1132,8 +1132,6 @@ jobs:
 ```
 
 
-
-
 ## Setup and Contributions
 
 To contribute to this repository:
@@ -1148,3 +1146,6 @@ To contribute to this repository:
 ## Disclaimer
 
 This documentation provides a general overview and guidance for the `infra-secrets` repository. It is essential to refer to the specific files and scripts within the repository for detailed and context-specific instructions. The users of this repository are responsible for complying with all applicable policies and guidelines related to security and data handling.
+
+
+[def]: ttps://meetearnest.atlassian.net/wiki/spaces/EN/pages/2717089856/Migrate+from+aws-sts-token-generator+to+saml2aw
