@@ -8,7 +8,7 @@ This guide provides steps for setting up pre-commit hooks, managing secrets, and
 
 ## Table of Contents
 
-1. [TLDR Video & Presentation](#video-and-presentation)
+1. [TLDR - Video & Presentation](#video-and-presentation)
 2. [Pre-commit and Pre-requisites](#pre-commit-and-sops-pre-requisites)
 4. [Managing Secrets](#managing-secrets)
 5. [SAML Authentication with AWS IAM](#saml-authentication-with-aws-iam-using-okta)
