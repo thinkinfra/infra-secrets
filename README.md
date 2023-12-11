@@ -15,20 +15,10 @@ This guide provides steps for setting up pre-commit hooks, managing secrets, and
 
 1. [Pre-commit and Pre-requisites](#pre-commit-and-pre-requisites)
 2. [Managing Secrets](#managing-secrets)
-3. [SAML Authentication with AWS IAM](#saml-authentication-with-aws-iam)
-4. [Export AGE Keys for Self-Service](#export-age-keys-for-self-service)
-5. [Workflows](#workflows)
-
-## SAML Authentication with AWS IAM using OKTA
-
-Details on integrating Okta as a SAML Identity Provider (IdP) with AWS IAM for secure, federated access to AWS resources, including KMS.
-
-### Steps
-
-- Okta Setup
-- AWS IAM Configuration
-- Okta User and Group Setup
-- SAML Assertion and AWS Login
+3. [SAML Authentication with AWS IAM](#saml-authentication-with-aws-iam-using-okta)
+4. [Workflows](#workflows-configuration)
+4. [Setup and Contributions](#setup-and-contributions)
+4. [Disclaimer](#disclaimer)
 
 ## Pre-commit and Pre-requisites
 
@@ -38,6 +28,55 @@ cd infra-secrets
 pip install pre-commit
 pre-commit install
 ```
+
+## SAML Authentication with AWS IAM using OKTA
+
+Details on integrating Okta as a SAML Identity Provider (IdP) with AWS IAM for secure, federated access to AWS resources, including KMS.
+
+
+**SAML**: Using SAML (Security Assertion Markup Language) typically involves the following:
+<https://meetearnest.atlassian.net/wiki/spaces/EN/pages/2717089856/Migrate+from+aws-sts-token-generator+to+saml2aws>
+
+
+- Identity Provider (IdP) Setup: Configure a SAML IdP like Okta or OneLogin. This includes setting up user accounts and groups.
+- Service Provider (SP) Configuration: Configure the application or service (like AWS, Google Apps, etc.) to use SAML for authentication. This often involves uploading IdP metadata to the SP and configuring SAML settings.
+- User Authentication: Users authenticate themselves with the IdP using their credentials.
+- SAML Assertion: After successful authentication, the IdP sends a SAML assertion (a XML document) to the SP. This assertion contains the user's identity and possibly groups or roles.
+- Access Control: The SP uses the SAML assertion to grant access to the user. The level of access is usually determined by the user's role or group memberships specified in the assertion.
+- Single Sign-On (SSO): SAML enables SSO, allowing users to access multiple services with a single authentication at the IdP.
+
+```bash
+source ~/.secrets/saml2aws.sh sandbox                 
+
+account {
+  DisableSessions: false
+  DisableRememberDevice: false
+  URL: https://meetearnest.okta.com/home/amazon_aws/0oap56m1ntr0XKqug0x7/272
+  Username: 
+  Provider: Okta
+  MFA: TOTP
+  SkipVerify: false
+  AmazonWebservicesURN: urn:amazon:webservices
+  SessionDuration: 3600
+  Profile: saml
+  RoleARN: 
+  Region: us-east-1
+}
+
+Configuration saved for IDP account: est-sandbox
+Using IdP Account est-sandbox to access Okta https://meetearnest.okta.com/home/amazon_aws/0oap56m1ntr0XKqug0x7/272
+Authenticating as jeffry.milan@earnest.com ...
+Selected role: arn:aws:iam::644712362974:role/Okta-Sandbox-Administrator
+Requesting AWS credentials using SAML assertion.
+Logged in as: arn:aws:sts::644712362974:assumed-role/Okta-Sandbox-Administrator/jeffry.milan@earnest.com
+
+Your new access key pair has been stored in the AWS configuration.
+Note that it will expire at 2023-12-11 12:39:38 -0800 PST
+To use this credential, call the AWS CLI with the --profile option (e.g. aws --profile Okta-Sandbox-Administrator ec2 describe-instances).
+```
+
+
+
 
 ## Managing Secrets
 
@@ -54,6 +93,7 @@ sops --decrypt --in-place existing-secret.yaml
 vim existing-secret.yaml
 sops --encrypt --in-place existing-secret.yaml
 ```
+
 
 ## Workflows Configuration
 
@@ -1090,6 +1130,9 @@ jobs:
             fi
           done
 ```
+
+
+
 
 ## Setup and Contributions
 

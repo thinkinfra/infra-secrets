@@ -164,7 +164,7 @@ creation_rules:
     #     - 'FBBDA26E7AE5023C66D98453A93F3127586BD012'
     #     - '7EFF431796D90A32826B4C84178F957C4F712CA5'
   - path_regex: secrets/sandbox/lending/.*\.yaml$
-    shamir_threshold: 3 # master keys from two of the three different key groups in order to decrypt the file
+    shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
     key_groups:
     #default
     - kms:
