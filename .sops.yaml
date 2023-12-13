@@ -97,6 +97,50 @@ destination_rules:
     omit_extensions: true
 # Secret Keys #
 creation_rules:
+  # migration - sandbox
+  - path_regex: migration/sandbox/.*\.yaml$
+    shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
+    key_groups:
+    #default
+    - kms:
+      - arn: 'arn:aws:kms:us-east-1:644712362974:key/9d11b3d7-3b7c-4cde-ad6a-75a2721e0e27'
+        context:
+          account: sops-sa
+          region: us-east-1
+          type: kms-master-key
+      - arn: 'arn:aws:kms:us-east-1:644712362974:key/978a683a-4864-4537-88fb-2dc8ea4f8080'
+        context:
+          account: vault-sa
+          region: us-east-1
+          type: kms-master-key
+    - kms:
+      - arn: 'arn:aws:kms:us-west-2:644712362974:key/9d994675-3143-4b2a-a920-459c87207998'
+        context:
+          account: sops-sa
+          region: us-west-2
+          type: kms-master-key
+      - arn: 'arn:aws:kms:us-west-2:644712362974:key/5dcee9a6-72f1-4a7f-bdfe-f7be9ad02b72'
+        context:
+          account: vault-sa
+          region: us-west-2
+          type: kms-master-key
+  # migration - staging
+  - path_regex: migration/staging/.*\.yaml$
+    shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
+    key_groups:
+    #default
+    - kms:
+      - arn: 'arn:aws:kms:us-east-1:831351477977:key/206ebfec-4f97-4c3a-8439-92869a2f24df'
+        context:
+          account: sops-sa
+          region: us-east-1
+          type: kms-master-key
+    - kms:
+      - arn: 'arn:aws:kms:us-west-2:831351477977:key/7c3f81d7-1acc-474c-809b-dd9f8d9fe479'
+        context:
+          account: sops-sa
+          region: us-west-2
+          type: kms-master-key
 # path: /secrets
 # sandbox
   - path_regex: secrets/sandbox/customer-experience/.*\.yaml$
