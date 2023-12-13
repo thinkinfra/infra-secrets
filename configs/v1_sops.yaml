@@ -50,6 +50,25 @@ destination_rules:
     path_regex: secrets/production/lending/*
     omit_extensions: true
 
+# sandbox
+  - vault_path: "/"
+    vault_kv_mount_name: "secret" # default
+    vault_kv_version: 1 # default
+    path_regex: secrets/sandbox/*/*
+    omit_extensions: true
+# staging
+  - vault_path: "/"
+    vault_kv_mount_name: "secret" # default
+    vault_kv_version: 1 # default
+    path_regex: secrets/staging/*/*
+    omit_extensions: true
+# production
+  - vault_path: "/"
+    vault_kv_mount_name: "secret" # default
+    vault_kv_version: 1 # default
+    path_regex: secrets/production/*/*
+    omit_extensions: true
+
 # Secret Keys #
 creation_rules:
 # path: /secrets
@@ -218,7 +237,28 @@ creation_rules:
     - pgp:
         - '7246137C29494AB51DB9DC75A503AED1209A6985'
         - '7EFF431796D90A32826B4C84178F957C4F712CA5'
-
+  - path_regex: secrets/staging/*/.*\.(yml|yaml)$
+    shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
+    key_groups:
+    #default
+    - kms:
+      - arn: 'arn:aws:kms:us-east-1:831351477977:key/206ebfec-4f97-4c3a-8439-92869a2f24df'
+        context:
+          account: sops-sa
+          region: us-east-1
+          type: kms-master-key
+    - kms:
+      - arn: 'arn:aws:kms:us-west-2:831351477977:key/7c3f81d7-1acc-474c-809b-dd9f8d9fe479'
+        context:
+          account: sops-sa
+          region: us-west-2
+          type: kms-master-key
+    #lending
+    - age:
+        - 'age1uehup3jrcx5dlar4q8p8vw57d4lwkc2hcdtkmqhcrdp0n6lhvyas05ruf2'
+    - pgp:
+        - '7246137C29494AB51DB9DC75A503AED1209A6985'
+        - '7EFF431796D90A32826B4C84178F957C4F712CA5'
 # production
   - path_regex: secrets/production/customer-experience/.*\.yaml$
     shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
