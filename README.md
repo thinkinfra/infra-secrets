@@ -23,6 +23,8 @@ This guide provides steps for setting up pre-commit hooks, managing secrets, and
 
 - [Presentation](https://docs.google.com/presentation/d/1Yrqq4AgMq5SdXSyCOiXWXcHVzgMxF7BNETbUCFgFfY8/edit?usp=sharing)
 
+- [How to: Use (Self-Service) Secret Management Workflow](https://meetearnest.atlassian.net/wiki/x/y4DEuw)
+
 ## Pre-commit and Sops Pre-requisites
 ```bash
 git clone https://github.com/meetearnest/infra-secrets.git
