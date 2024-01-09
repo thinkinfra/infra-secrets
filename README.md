@@ -154,9 +154,8 @@ on:
         required: true
         type: choice
         options:
-          - customer-experience
+          - developers
           - infra
-          - lending
       service:
         description: 'Name of the service (secret file name without extension)'
         required: true
