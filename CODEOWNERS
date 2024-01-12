@@ -1,2 +1,16 @@
 * @meetearnest/infrastructure
 
+# Lines starting with '#' are comments.
+# Each line is a file pattern followed by one or more owners.
+
+# These owners will be the default owners for everything in the repo.
+*       @meetearnest/infrastructure
+# Sandbox
+/secrets/sandbox/developers @meetearnest/engineers
+/secrets/production/infrastructure @meetearnest/infrastructure @meetearnest/developer-productivity @meetearnest/security
+# Staging
+/secrets/staging/developers @meetearnest/tech-leads @meetearnest/infrastructure @meetearnest/developer-productivity
+/secrets/production/infrastructure @meetearnest/infrastructure @meetearnest/developer-productivity @meetearnest/security
+# Production
+/secrets/production/developers @meetearnest/tech-leads @meetearnest/infrastructure @meetearnest/developer-productivity
+/secrets/production/infrastructure @meetearnest/infrastructure @meetearnest/developer-productivity @meetearnest/security
