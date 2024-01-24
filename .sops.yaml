@@ -133,7 +133,7 @@ destination_rules:
 # Secret Keys #
 creation_rules:
   # migration - sandbox
-  - path_regex: migration/sandbox/.*\.yaml$
+  - path_regex: migration/sandbox/*/.*\.(yml|yaml)$
     shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
     key_groups:
     #default
@@ -160,7 +160,7 @@ creation_rules:
           region: us-west-2
           type: kms-master-key
   # migration - staging
-  - path_regex: migration/staging/.*\.yaml$
+  - path_regex: migration/staging/*/.*\.(yml|yaml)$
     shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
     key_groups:
     #default
@@ -176,6 +176,23 @@ creation_rules:
           account: sops-sa
           region: us-west-2
           type: kms-master-key
+  - path_regex: migration/production/*/.*\.(yml|yaml)$
+    shamir_threshold: 2 # master keys from two of the three different key groups in order to decrypt the file
+    key_groups:
+    #default
+    - kms:
+      - arn: 'arn:aws:kms:us-east-1:075440130607:key/9c9d8098-b5bd-49aa-a778-b5ed3bf39be7'
+        context:
+          account: sops-sa
+          region: us-east-1
+          type: kms-master-key
+    - kms:
+      - arn: 'arn:aws:kms:us-west-2:075440130607:key/89541f0d-dcd8-4b30-916e-287ede732d31'
+        context:
+          account: sops-sa
+          region: us-west-2
+          type: kms-master-key
+
 # path: /secrets
 # sandbox
   - path_regex: secrets/sandbox/customer-experience/.*\.yaml$
